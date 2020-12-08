@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
-import { Resolver, Query, Arg, Mutation, Root, FieldResolver } from "type-graphql";
-import { ObjectIdScalar } from "../../../type-graphql/ObjectIdScalar";
+import { Resolver, Query, Arg, Mutation, Root, FieldResolver, UseMiddleware, Ctx } from "type-graphql";
+import { ApolloContext } from "../../../apollo-server/ApolloContext";
+import isAuth from "../../../middlewares/isAuth";
 import { IUser } from "../../users/IUser";
 import UserModel from "../../users/UserModel";
 import { CreatePostInput } from "../inputs/CreatePostInput";
@@ -24,17 +25,21 @@ export class PostResolver {
   }
 
   @Mutation(_returns => Post)
+  @UseMiddleware(isAuth)
   async createPost(
     @Arg('data'){
       title,
       content,
     }: CreatePostInput,
-    @Arg('creatorId', _type => ObjectIdScalar) creatorId: typeof ObjectId,
+    // @Arg('creatorId', _type => ObjectIdScalar) creatorId: typeof ObjectId,
+    @Ctx() { req }: ApolloContext
   ): Promise<IPost> { 
+    const creator = req.user.id;
+    
     const post = new PostModel({
       title,
       content,
-      creator: creatorId
+      creator,
     });
 
     await post.save();

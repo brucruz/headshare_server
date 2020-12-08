@@ -9,10 +9,13 @@ export default class UserResponse {
 
   @Field(() => User, { nullable: true })
   user?: IUser;
+
+  @Field(() => String, { nullable: true })
+  token?: string;
 }
 
 @ObjectType()
-class FieldError {
+export class FieldError {
   @Field()
   field: string;
   

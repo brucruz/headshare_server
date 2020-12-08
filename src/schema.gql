@@ -44,7 +44,7 @@ input LoginUserInput {
 }
 
 type Mutation {
-  createPost(creatorId: ObjectId!, data: CreatePostInput!): Post!
+  createPost(data: CreatePostInput!): Post!
   login(loginData: LoginUserInput!): UserResponse!
   register(data: RegisterUserInput!): UserResponse!
   updatePost(id: String!, updateData: UpdatePostInput!): Post
@@ -139,5 +139,6 @@ type User {
 
 type UserResponse {
   errors: [FieldError!]
+  token: String
   user: User
 }

@@ -1,5 +1,7 @@
 import { ObjectId } from "mongodb";
-import { Arg, Mutation, Resolver, Query, FieldResolver, Root } from "type-graphql";
+import { Arg, Mutation, Resolver, Query, FieldResolver, Root, Ctx } from "type-graphql";
+import { sign } from 'jsonwebtoken';
+import authConfig from '../../../config/auth';
 import { ObjectIdScalar } from "../../../type-graphql/ObjectIdScalar";
 import EditMeInput from "../inputs/EditMeInput";
 import { IUser } from "../IUser";
@@ -10,6 +12,7 @@ import UserResponse from "./UserResponse";
 import LoginUserInput from "../inputs/LoginUserInput";
 import PostModel from "../../posts/PostModel";
 import IPost from "../../posts/IPost";
+import { ApolloContext } from "../../../apollo-server/ApolloContext";
 
 @Resolver(_of => User)
 export default class UserResolver {
@@ -98,7 +101,8 @@ export default class UserResolver {
     @Arg('loginData') {
       email,
       password,
-    }: LoginUserInput): Promise<UserResponse> {
+    }: LoginUserInput,
+  ): Promise<UserResponse> {
     const user = await UserModel.findOne({ email });
 
     if (!user) {
@@ -123,8 +127,16 @@ export default class UserResolver {
       };
     }
 
+    const { secret, expiresIn } = authConfig.jwt;
+
+    const token = sign({}, secret, {
+      subject: user._id.toString(),
+      expiresIn,
+    });
+
     return {
-      user
+      user,
+      token,
     };
   }
 

@@ -4,6 +4,7 @@ import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import mongoose from 'mongoose';
 import * as path from "path";
+import 'dotenv/config';
 
 import { ObjectIdScalar } from "./type-graphql/ObjectIdScalar";
 import UserResolver from "./modules/users/resolvers";
@@ -29,6 +30,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema,
+    context: ({ req, res }) => ({ req, res }),
   });
   const app = Express();
   apolloServer.applyMiddleware({ app });
