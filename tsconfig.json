@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es2017",
     "module": "commonjs",
     "lib": [
       "dom",
@@ -11,6 +11,7 @@
     "sourceMap": true,
     "outDir": "./dist",
     "moduleResolution": "node",
+    "allowJs": true,
     "removeComments": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -25,6 +26,10 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/@types"
+    ],
   },
   "exclude": [
     "node_modules"
