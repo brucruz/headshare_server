@@ -16,12 +16,26 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 """
 scalar DateTime
 
+input EditMeInput {
+  """User email to be used on login"""
+  email: String
+
+  """User name"""
+  name: String
+
+  """User password to be used on login"""
+  password: String
+
+  """User surname"""
+  surname: String
+}
+
 type FieldError {
   field: String!
   message: String!
 }
 
-input LoginInput {
+input LoginUserInput {
   """User email to be used on login"""
   email: String!
 
@@ -30,11 +44,11 @@ input LoginInput {
 }
 
 type Mutation {
-  createPost(creatorId: String!, data: CreatePostInput!): Post!
-  login(loginData: LoginInput!): UserResponse!
-  register(data: RegisterInput!): UserResponse!
+  createPost(creatorId: ObjectId!, data: CreatePostInput!): Post!
+  login(loginData: LoginUserInput!): UserResponse!
+  register(data: RegisterUserInput!): UserResponse!
   updatePost(id: String!, updateData: UpdatePostInput!): Post
-  updateUser(id: String!, updateData: UpdateUserInput!): User
+  updateUser(_id: ObjectId!, updateData: EditMeInput!): User
 }
 
 """Mongo object id scalar type"""
@@ -50,9 +64,11 @@ type Post {
   """Post creation date"""
   createdAt: DateTime!
   creator: User!
+  isActive: Boolean!
 
   """Number of likes this post has received"""
   likes: Float
+  removedAt: DateTime
 
   """Post title"""
   title: String!
@@ -73,11 +89,10 @@ type Query {
 
   """Queries an user by providing an email. If none is found, return null."""
   findUserByEmail(email: String!): User
-  hello: String!
-  me: User
+  me(id: ObjectId!): User
 }
 
-input RegisterInput {
+input RegisterUserInput {
   """User email to be used on login"""
   email: String!
 
@@ -99,20 +114,6 @@ input UpdatePostInput {
   title: String
 }
 
-input UpdateUserInput {
-  """User email to be used on login"""
-  email: String
-
-  """User name"""
-  name: String
-
-  """User password to be used on login"""
-  password: String
-
-  """User surname"""
-  surname: String
-}
-
 """The Users model"""
 type User {
   _id: ObjectId!
@@ -122,9 +123,12 @@ type User {
 
   """User email to be used on login"""
   email: String!
+  isActive: Boolean!
 
   """User name"""
   name: String!
+  posts: [Post!]!
+  removedAt: DateTime
 
   """User surname"""
   surname: String

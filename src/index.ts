@@ -3,15 +3,19 @@ import Express from "express";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import mongoose from 'mongoose';
-import { HelloResolver } from "./resolvers/hello";
-import { UserResolver } from "./resolvers/user";
-import { PostResolver } from "./resolvers/post";
+import * as path from "path";
 
+import { ObjectIdScalar } from "./type-graphql/ObjectIdScalar";
+import UserResolver from "./modules/users/resolvers";
+import { PostResolver } from "./modules/posts/resolvers";
+
+const { ObjectId } = mongoose.Schema.Types;
 
 const main = async () => {
   const schema = await buildSchema({
-    resolvers: [HelloResolver, UserResolver, PostResolver],
-    emitSchemaFile: true,
+    resolvers: [UserResolver, PostResolver],
+    emitSchemaFile: path.resolve(__dirname, "schema.gql"),
+    scalarsMap: [{ type: ObjectId, scalar: ObjectIdScalar }],
     validate: false
   });
 
