@@ -1,6 +1,9 @@
 import { ObjectId } from 'mongodb';
 import mongoose, { Model } from 'mongoose';
-import { isActiveMongooseField, removedAtMongooseField } from "../../mongoose/withMongooseFields";
+import {
+  isActiveMongooseField,
+  removedAtMongooseField,
+} from '../../mongoose/withMongooseFields';
 import IPost from './IPost';
 
 const Schema = new mongoose.Schema(
@@ -9,6 +12,14 @@ const Schema = new mongoose.Schema(
       type: String,
       trim: true,
       required: true,
+    },
+    slug: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+    description: {
+      type: String,
     },
     content: {
       type: String,

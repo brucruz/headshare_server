@@ -1,11 +1,14 @@
 {
     "env": {
-        "es2021": true,
+        "es2017": true,
         "node": true,
         "jest": true
     },
     "extends": [
-        "airbnb-base"
+        "airbnb-base",
+        "plugin:@typescript-eslint/recommended",
+        "prettier/@typescript-eslint",
+        "plugin:prettier/recommended"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
@@ -13,13 +16,29 @@
         "sourceType": "module"
     },
     "plugins": [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "prettier"
     ],
     "rules": {
       "class-methods-use-this": "off",
       "no-useless-constructor": "off",
       "@typescript-eslint/no-unused-vars": ["error", {
-        "argsIgnorePattern": "_"
-      }]
+        "argsIgnorePattern": "^_"
+      }],
+      "no-underscore-dangle": "off",
+      "import/extensions": [
+        "error",
+        "ignorePackages",
+        {
+          "ts": "never"
+        }
+      ]
+    },
+    "settings": {
+      "import/resolver": {
+        "node": {
+          "extensions": [".js", ".jsx", ".ts", ".tsx"]
+        }
+      }
     }
 }

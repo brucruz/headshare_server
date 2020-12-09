@@ -1,6 +1,6 @@
-import { verify } from "jsonwebtoken";
-import { MiddlewareFn } from "type-graphql";
-import { ApolloContext } from "../apollo-server/ApolloContext";
+import { verify } from 'jsonwebtoken';
+import { MiddlewareFn } from 'type-graphql';
+import { ApolloContext } from '../apollo-server/ApolloContext';
 import authConfig from '../config/auth';
 
 interface ITokenPayload {
@@ -11,7 +11,7 @@ interface ITokenPayload {
 
 const isAuth: MiddlewareFn<ApolloContext> = ({ context }, next) => {
   const authHeader = context.req.headers.authorization;
-  
+
   if (!authHeader) {
     // return {
     //   errors: [
@@ -50,6 +50,6 @@ const isAuth: MiddlewareFn<ApolloContext> = ({ context }, next) => {
     // }
     throw new Error('Invalid JWT token');
   }
-}
+};
 
 export default isAuth;

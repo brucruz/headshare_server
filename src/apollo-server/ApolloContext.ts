@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 
 export interface ApolloContext {
-  req: Request,
-  res: Response,
+  req: Request;
+  res: Response;
 }

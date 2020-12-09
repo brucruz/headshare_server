@@ -1,7 +1,10 @@
 import { hash, verify } from 'argon2';
 import { ObjectId } from 'mongodb';
 import mongoose, { Model } from 'mongoose';
-import { isActiveMongooseField, removedAtMongooseField } from '../../mongoose/withMongooseFields';
+import {
+  isActiveMongooseField,
+  removedAtMongooseField,
+} from '../../mongoose/withMongooseFields';
 import { IUser } from './IUser';
 
 const Schema = new mongoose.Schema(
@@ -46,7 +49,10 @@ export interface IUserModel extends Model<IUser> {
   encryptPassword(password: string): Promise<string>;
 }
 
-const UserModel: IUserModel = mongoose.model<IUser, IUserModel>('users', Schema);
+const UserModel: IUserModel = mongoose.model<IUser, IUserModel>(
+  'users',
+  Schema,
+);
 
 export default UserModel;
 
@@ -78,7 +84,9 @@ async function preUpdate(this: any) {
     update.password = await UserModel.encryptPassword(update.password);
   }
   if (update.$set && update.$set.password) {
-    update.$set.password = await UserModel.encryptPassword(update.$set.password);
+    update.$set.password = await UserModel.encryptPassword(
+      update.$set.password,
+    );
   }
 }
 
@@ -87,7 +95,7 @@ Schema.pre('updateMany', preUpdate);
 Schema.pre('updateOne', preUpdate);
 Schema.pre('findOneAndUpdate', preUpdate);
 
-Schema.pre<IUser>('insertMany', async function preInsertMany(_next) {
+Schema.pre<IUser>('insertMany', async function preInsertMany() {
   if (this.isModified('password') && this.password) {
     this.password = await UserModel.encryptPassword(this.password);
   }

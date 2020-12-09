@@ -1,5 +1,5 @@
-import { Document } from "mongoose";
-import { Post } from "../posts/PostType";
+import { Document } from 'mongoose';
+import Post from '../posts/PostType';
 
 export interface IUser extends Document {
   name: string;

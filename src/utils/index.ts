@@ -8,9 +8,9 @@ export const getPlatform = (platform?: string | null): string => {
     return PLATFORM.UNKNOWN;
   }
 
-  //if (platform.includes('ios') || platform.includes('android')) {
+  // if (platform.includes('ios') || platform.includes('android')) {
   //  return PLATFORM.APP;
-  //}
+  // }
 
   if (platform === PLATFORM.APP) {
     return PLATFORM.APP;

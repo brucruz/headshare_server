@@ -1,6 +1,16 @@
-import { Field, ObjectType } from "type-graphql";
-import { IUser } from "../IUser";
-import User from "../UserType";
+/* eslint-disable max-classes-per-file */
+import { Field, ObjectType } from 'type-graphql';
+import { IUser } from '../IUser';
+import User from '../UserType';
+
+@ObjectType()
+export class FieldError {
+  @Field()
+  field: string;
+
+  @Field()
+  message: string;
+}
 
 @ObjectType()
 export default class UserResponse {
@@ -12,13 +22,4 @@ export default class UserResponse {
 
   @Field(() => String, { nullable: true })
   token?: string;
-}
-
-@ObjectType()
-export class FieldError {
-  @Field()
-  field: string;
-  
-  @Field()
-  message: string;
 }

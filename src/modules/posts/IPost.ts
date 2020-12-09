@@ -1,8 +1,10 @@
-import { Document } from "mongoose";
-import User from "../users/UserType";
+import { Document } from 'mongoose';
+import User from '../users/UserType';
 
 export default interface IPost extends Document {
   title: string;
+  slug: string;
+  description?: string;
   content: string;
   likes?: number;
   creator: User;

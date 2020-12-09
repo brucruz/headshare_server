@@ -1,11 +1,11 @@
-import { hash } from "argon2";
-import { ObjectId } from "mongodb";
-import { Field, ObjectType } from "type-graphql";
-import { ObjectIdScalar } from "../../type-graphql/ObjectIdScalar";
-import { Post } from "../posts/PostType";
+import { hash } from 'argon2';
+import { ObjectId } from 'mongodb';
+import { Field, ObjectType } from 'type-graphql';
+import { ObjectIdScalar } from '../../type-graphql/ObjectIdScalar';
+import Post from '../posts/PostType';
 
 @ObjectType({ description: 'The Users model' })
-export default class User  {
+export default class User {
   @Field(() => ObjectIdScalar)
   readonly _id: ObjectId;
 
@@ -19,11 +19,11 @@ export default class User  {
   email: string;
 
   password?: string;
-  
-  @Field(_type => [Post])
+
+  @Field(() => [Post])
   posts: Post[];
 
-  _doc?: any
+  _doc?: any;
 
   @Field()
   isActive: boolean;
@@ -33,7 +33,7 @@ export default class User  {
 
   @Field({ description: 'User creation date' })
   createdAt: Date;
-  
+
   @Field({ description: 'User last update date', nullable: true })
   updatedAt: Date;
 
