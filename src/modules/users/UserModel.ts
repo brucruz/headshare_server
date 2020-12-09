@@ -45,14 +45,11 @@ const Schema = new mongoose.Schema(
   },
 );
 
-export interface IUserModel extends Model<IUser> {
+export interface UserModel extends Model<IUser> {
   encryptPassword(password: string): Promise<string>;
 }
 
-const UserModel: IUserModel = mongoose.model<IUser, IUserModel>(
-  'users',
-  Schema,
-);
+const UserModel: UserModel = mongoose.model<IUser, UserModel>('users', Schema);
 
 export default UserModel;
 

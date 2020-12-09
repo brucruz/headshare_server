@@ -9,12 +9,13 @@ import 'dotenv/config';
 import { ObjectIdScalar } from './type-graphql/ObjectIdScalar';
 import UserResolver from './modules/users/resolvers';
 import PostResolver from './modules/posts/resolvers';
+import CommunityResolver from './modules/communities/resolvers';
 
 const { ObjectId } = mongoose.Schema.Types;
 
 const main = async () => {
   const schema = await buildSchema({
-    resolvers: [UserResolver, PostResolver],
+    resolvers: [UserResolver, PostResolver, CommunityResolver],
     emitSchemaFile: path.resolve(__dirname, 'schema.gql'),
     scalarsMap: [{ type: ObjectId, scalar: ObjectIdScalar }],
     validate: false,

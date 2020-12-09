@@ -11,6 +11,7 @@ import {
 } from 'type-graphql';
 import { ApolloContext } from '../../../apollo-server/ApolloContext';
 import isAuth from '../../../middlewares/isAuth';
+import APIResponse from '../../shared/APIResponse';
 import { IUser } from '../../users/IUser';
 import UserModel from '../../users/UserModel';
 import CreatePostInput from '../inputs/CreatePostInput';
@@ -41,10 +42,20 @@ export default class PostResolver {
   @UseMiddleware(isAuth)
   async createPost(
     @Arg('data') { title, slug, description, content }: CreatePostInput,
-    // @Arg('creatorId', _type => ObjectIdScalar) creatorId: typeof ObjectId,
     @Ctx() { req }: ApolloContext,
-  ): Promise<IPost> {
-    const creator = req.user.id;
+  ): Promise<APIResponse<IPost>> {
+    const creator = req.user?.id;
+
+    if (!creator) {
+      return {
+        errors: [
+          {
+            field: 'id',
+            message: 'Invalid JWT token',
+          },
+        ],
+      };
+    }
 
     const post = new PostModel({
       title,
@@ -56,7 +67,7 @@ export default class PostResolver {
 
     await post.save();
 
-    return post;
+    return { data: post };
   }
 
   @Mutation(() => Post, { nullable: true })

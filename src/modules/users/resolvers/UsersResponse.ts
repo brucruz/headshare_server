@@ -4,10 +4,10 @@ import User from '../UserType';
 import FieldError from '../../shared/ErrorResponse';
 
 @ObjectType()
-export default class UserResponse {
+export default class UsersResponse {
   @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
 
-  @Field(() => User, { nullable: true })
-  user?: IUser;
+  @Field(() => [User], { nullable: true })
+  users?: IUser[];
 }

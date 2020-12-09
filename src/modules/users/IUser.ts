@@ -7,7 +7,7 @@ export interface IUser extends Document {
   password?: string;
   email: string;
   isActive?: boolean;
-  posts: Post[];
+  posts?: Post[];
   removedAt?: Date | null;
   createdAt?: Date;
   updatedAt?: Date;
