@@ -12,7 +12,7 @@ import {
 import { sign } from 'jsonwebtoken';
 import { verify } from 'argon2';
 import authConfig from '../../../config/auth';
-import { ObjectIdScalar } from '../../../type-graphql/ObjectIdScalar';
+import ObjectIdScalar from '../../../type-graphql/ObjectIdScalar';
 import EditMeInput from '../inputs/EditMeInput';
 import { IUser } from '../IUser';
 import UserModel from '../UserModel';
@@ -32,10 +32,7 @@ import Post from '../../posts/PostType';
 export default class UserResolver {
   @UseMiddleware(isAuth)
   @Query(() => UserResponse, { nullable: true })
-  public async me(
-    // @Arg('id', () => ObjectIdScalar) id: ObjectId,
-    @Ctx() { req }: ApolloContext,
-  ): Promise<UserResponse> {
+  public async me(@Ctx() { req }: ApolloContext): Promise<UserResponse> {
     if (!req.user) {
       return {
         errors: [
@@ -124,6 +121,19 @@ export default class UserResolver {
       };
     }
 
+    const checkIfExists = await UserModel.findOne({ email });
+
+    if (checkIfExists) {
+      return {
+        errors: [
+          {
+            field: 'email',
+            message: 'There is already an user registered with this email',
+          },
+        ],
+      };
+    }
+
     let user = {} as IUser;
     let token = '';
 
@@ -178,7 +188,18 @@ export default class UserResolver {
       };
     }
 
-    const correctPassword = await verify(user.password!, password);
+    if (!user.password) {
+      return {
+        errors: [
+          {
+            field: 'email or password',
+            message: 'Email/password combination is invalid',
+          },
+        ],
+      };
+    }
+
+    const correctPassword = await verify(user.password, password);
 
     if (!correctPassword) {
       return {
@@ -209,7 +230,7 @@ export default class UserResolver {
   @Mutation(() => UserResponse, { nullable: true })
   async updateUser(
     @Arg('_id', () => ObjectIdScalar) _id: ObjectId,
-    @Arg('updateData') { name, surname, email, password }: EditMeInput,
+    @Arg('updateData') { name, surname, email, password, avatar }: EditMeInput,
   ): Promise<UserResponse> {
     const newData = {
       $set: {
@@ -217,6 +238,7 @@ export default class UserResolver {
         ...(surname ? { surname } : {}),
         ...(email ? { email } : {}),
         ...(password ? { password } : {}),
+        ...(avatar ? { avatar } : {}),
       },
     };
 
@@ -250,6 +272,7 @@ export default class UserResolver {
 
   @FieldResolver(() => [Post])
   async posts(@Root() user: User): Promise<IPost[]> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return (await PostModel.find({ creator: user._doc._id }))!;
   }
 }

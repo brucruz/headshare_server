@@ -1,31 +1,18 @@
 import { ApolloServer } from 'apollo-server-express';
 import Express from 'express';
 import 'reflect-metadata';
-import { buildSchema } from 'type-graphql';
 import mongoose from 'mongoose';
-import * as path from 'path';
 import 'dotenv/config';
-
-import { ObjectIdScalar } from './type-graphql/ObjectIdScalar';
-import UserResolver from './modules/users/resolvers';
-import PostResolver from './modules/posts/resolvers';
-import CommunityResolver from './modules/communities/resolvers';
-
-const { ObjectId } = mongoose.Schema.Types;
+import schema from './graphql/schema';
 
 const main = async () => {
-  const schema = await buildSchema({
-    resolvers: [UserResolver, PostResolver, CommunityResolver],
-    emitSchemaFile: path.resolve(__dirname, 'schema.gql'),
-    scalarsMap: [{ type: ObjectId, scalar: ObjectIdScalar }],
-    validate: false,
-  });
-
   await mongoose.connect(
     'mongodb://localhost:27017/creators-communities-project',
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      useFindAndModify: false,
+      useCreateIndex: true,
     },
   );
 
@@ -33,7 +20,7 @@ const main = async () => {
   mongoose.set('useFindAndModify', false);
 
   const apolloServer = new ApolloServer({
-    schema,
+    schema: await schema,
     context: ({ req, res }) => ({ req, res }),
   });
   const app = Express();

@@ -1,7 +1,7 @@
 import { hash } from 'argon2';
 import { ObjectId } from 'mongodb';
 import { Field, ObjectType } from 'type-graphql';
-import { ObjectIdScalar } from '../../type-graphql/ObjectIdScalar';
+import ObjectIdScalar from '../../type-graphql/ObjectIdScalar';
 import Post from '../posts/PostType';
 
 @ObjectType({ description: 'The Users model' })
@@ -19,6 +19,9 @@ export default class User {
   email: string;
 
   password?: string;
+
+  @Field({ description: 'User avatar image link', nullable: true })
+  avatar?: string;
 
   @Field(() => [Post])
   posts: Post[];

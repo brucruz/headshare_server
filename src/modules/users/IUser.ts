@@ -6,8 +6,9 @@ export interface IUser extends Document {
   surname?: string;
   password?: string;
   email: string;
-  isActive?: boolean;
+  avatar?: string;
   posts?: Post[];
+  isActive?: boolean;
   removedAt?: Date | null;
   createdAt?: Date;
   updatedAt?: Date;

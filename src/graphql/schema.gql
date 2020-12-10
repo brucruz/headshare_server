@@ -3,59 +3,6 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
-"""The Communities model"""
-type Community {
-  _id: ObjectId!
-
-  """Community creation date"""
-  createdAt: DateTime!
-
-  """Community description"""
-  description: String
-  isActive: Boolean!
-
-  """Community title"""
-  logo: String
-  removedAt: DateTime
-
-  """Community slug to use on url"""
-  slug: String!
-
-  """Community title"""
-  title: String!
-
-  """Community last update date"""
-  updatedAt: DateTime
-}
-
-input CreateCommunityInput {
-  """Community description"""
-  description: String
-
-  """Community title"""
-  logo: String
-
-  """Community slug to use on url"""
-  slug: String!
-
-  """Community title"""
-  title: String!
-}
-
-input CreatePostInput {
-  """Post content"""
-  content: String!
-
-  """Post description"""
-  description: String
-
-  """Post slug to use on url"""
-  slug: String!
-
-  """Post title"""
-  title: String!
-}
-
 """
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
@@ -99,12 +46,8 @@ input LoginUserInput {
 }
 
 type Mutation {
-  """Users can create a community"""
-  createCommunity(communityData: CreateCommunityInput!): Community!
-  createPost(data: CreatePostInput!): Post!
   login(loginData: LoginUserInput!): LoggedUserResponse!
   register(data: RegisterUserInput!): LoggedUserResponse!
-  updatePost(id: String!, updateData: UpdatePostInput!): Post
   updateUser(_id: ObjectId!, updateData: EditMeInput!): UserResponse
 }
 
@@ -141,16 +84,8 @@ type Post {
 }
 
 type Query {
-  communities: [Community!]!
-
-  """Queries all posts in database"""
-  findAllPosts: [Post!]!
-
   """Queries all users in database"""
   findAllUsers: UsersResponse!
-
-  """Queries an post by providing an email. If none is found, return null."""
-  findPostById(id: String!): Post
 
   """Queries an user by providing an email. If none is found, return null."""
   findUserByEmail(email: String!): UserResponse
@@ -169,20 +104,6 @@ input RegisterUserInput {
 
   """User surname"""
   surname: String
-}
-
-input UpdatePostInput {
-  """Post content"""
-  content: String
-
-  """Post description"""
-  description: String
-
-  """Post slug to use on url"""
-  slug: String
-
-  """Post title"""
-  title: String
 }
 
 """The Users model"""

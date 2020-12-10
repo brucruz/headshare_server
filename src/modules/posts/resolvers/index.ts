@@ -11,7 +11,6 @@ import {
 } from 'type-graphql';
 import { ApolloContext } from '../../../apollo-server/ApolloContext';
 import isAuth from '../../../middlewares/isAuth';
-import APIResponse from '../../shared/APIResponse';
 import { IUser } from '../../users/IUser';
 import UserModel from '../../users/UserModel';
 import CreatePostInput from '../inputs/CreatePostInput';

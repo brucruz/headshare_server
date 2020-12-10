@@ -23,8 +23,12 @@ const Schema = new mongoose.Schema(
       trim: true,
       index: true,
       required: true,
+      unique: true,
     },
     password: {
+      type: String,
+    },
+    avatar_url: {
       type: String,
     },
     posts: [

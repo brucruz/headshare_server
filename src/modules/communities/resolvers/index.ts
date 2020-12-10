@@ -29,7 +29,7 @@ export default class CommunityResolver {
     { logo, title, slug, description }: CreateCommunityInput,
     @Ctx() { req }: ApolloContext,
   ): Promise<ICommunity> {
-    const creator = req.user.id;
+    const creator = req.user?.id;
 
     const community = new CommunityModel({
       logo,

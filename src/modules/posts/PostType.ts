@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { Field, ObjectType } from 'type-graphql';
-import { ObjectIdScalar } from '../../type-graphql/ObjectIdScalar';
+import ObjectIdScalar from '../../type-graphql/ObjectIdScalar';
 import User from '../users/UserType';
 
 @ObjectType({ description: 'The Posts model' })
