@@ -4,7 +4,7 @@ import {
   isActiveMongooseField,
   removedAtMongooseField,
 } from '../../mongoose/withMongooseFields';
-import IPost from './IPost';
+import ITag from './ITag';
 
 const Schema = new mongoose.Schema(
   {
@@ -26,34 +26,22 @@ const Schema = new mongoose.Schema(
     description: {
       type: String,
     },
-    content: {
-      type: String,
-      required: true,
-    },
-    likes: {
-      type: Number,
-    },
-    creator: {
-      type: ObjectId,
-      required: true,
-      ref: 'users',
-    },
     community: {
       type: ObjectId,
       required: true,
       ref: 'communities',
     },
-    tags: [
+    posts: [
       {
         type: ObjectId,
-        ref: 'tags',
+        ref: 'posts',
       },
     ],
     ...isActiveMongooseField,
     ...removedAtMongooseField,
   },
   {
-    collection: 'posts',
+    collection: 'tags',
     timestamps: {
       createdAt: 'createdAt',
       updatedAt: 'updatedAt',
@@ -61,8 +49,8 @@ const Schema = new mongoose.Schema(
   },
 );
 
-export type PostModel = Model<IPost>;
+export type TagModel = Model<ITag>;
 
-const PostModel: PostModel = mongoose.model<IPost, PostModel>('posts', Schema);
+const TagModel: TagModel = mongoose.model<ITag, TagModel>('tags', Schema);
 
-export default PostModel;
+export default TagModel;

@@ -37,6 +37,12 @@ const Schema = new mongoose.Schema(
         ref: 'posts',
       },
     ],
+    roles: [
+      {
+        type: ObjectId,
+        ref: 'roles',
+      },
+    ],
     ...isActiveMongooseField,
     ...removedAtMongooseField,
   },

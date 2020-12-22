@@ -2,6 +2,7 @@ import { ApolloServer } from 'apollo-server-express';
 import Express from 'express';
 import 'reflect-metadata';
 import mongoose from 'mongoose';
+import cors from 'cors';
 import 'dotenv/config';
 import schema from './graphql/schema';
 
@@ -17,14 +18,20 @@ const main = async () => {
   );
 
   mongoose.set('debug', true);
-  mongoose.set('useFindAndModify', false);
 
   const apolloServer = new ApolloServer({
     schema: await schema,
     context: ({ req, res }) => ({ req, res }),
   });
   const app = Express();
-  apolloServer.applyMiddleware({ app });
+  app.use(
+    cors({
+      origin: 'localhost:3000',
+      credentials: true,
+    }),
+  );
+
+  apolloServer.applyMiddleware({ app, cors: false });
   app.listen({ port: 4000 }, () =>
     console.log(
       `🚀 Server ready and listening at ==> http://localhost:4000${apolloServer.graphqlPath}`,

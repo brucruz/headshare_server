@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb';
 import { Field, ObjectType } from 'type-graphql';
 import ObjectIdScalar from '../../type-graphql/ObjectIdScalar';
 import Post from '../posts/PostType';
+import Role from '../roles/RoleType';
 
 @ObjectType({ description: 'The Users model' })
 export default class User {
@@ -25,6 +26,9 @@ export default class User {
 
   @Field(() => [Post])
   posts: Post[];
+
+  @Field(() => [Role])
+  roles: Role[];
 
   _doc?: any;
 

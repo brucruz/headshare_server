@@ -9,7 +9,7 @@ const gql = String.raw;
 
 const email = 'johndoe@example.com';
 
-describe('UserUpdateMutation', () => {
+describe('UpdateUserMutation', () => {
   beforeAll(connectToDB);
 
   beforeEach(cleanDB);

@@ -3,12 +3,114 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type CommunitiesResponse {
+  communities: [Community!]
+  errors: [ErrorResponse!]
+}
+
+"""The Communities model"""
+type Community {
+  _id: ObjectId!
+
+  """Community creation date"""
+  createdAt: DateTime!
+
+  """The user who created this community"""
+  creator: User!
+
+  """Community description"""
+  description: String
+
+  """The number of users following this community"""
+  followersCount: Int!
+  isActive: Boolean!
+
+  """Community title"""
+  logo: String
+
+  """The number of subscribed users in this community"""
+  membersCount: Int!
+  posts: [Post!]!
+  removedAt: DateTime
+  roles: [Role!]!
+
+  """Community slug to use on url"""
+  slug: String!
+
+  """Community title"""
+  title: String!
+
+  """Community last update date"""
+  updatedAt: DateTime
+}
+
+type CommunityResponse {
+  community: Community
+  errors: [ErrorResponse!]
+}
+
+input CreateCommunityInput {
+  """Community description"""
+  description: String
+
+  """Community title"""
+  logo: String
+
+  """Community slug to use on url"""
+  slug: String!
+
+  """Community title"""
+  title: String!
+}
+
+input CreatePostInput {
+  """Post content"""
+  content: String!
+
+  """Post description"""
+  description: String
+
+  """Post slug to use on url"""
+  slug: String!
+
+  """Post content"""
+  tags: [ObjectId!]
+
+  """Post title"""
+  title: String!
+}
+
+input CreateRoleInput {
+  """Community of which the role is about"""
+  community: ObjectId!
+
+  """User role in community"""
+  role: RoleOptions!
+
+  """User of which the role is about"""
+  user: ObjectId!
+}
+
+input CreateTagInput {
+  """Tag description"""
+  description: String
+
+  """Tag slug to use on url"""
+  slug: String!
+
+  """Tag title"""
+  title: String!
+}
+
 """
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
 scalar DateTime
 
 input EditMeInput {
+  """User avatar image link"""
+  avatar: String
+
   """User email to be used on login"""
   email: String
 
@@ -46,8 +148,17 @@ input LoginUserInput {
 }
 
 type Mutation {
+  """Users can create a community"""
+  createCommunity(communityData: CreateCommunityInput!): CommunityResponse!
+  createPost(communitySlug: String!, data: CreatePostInput!): PostResponse!
+  createRole(data: CreateRoleInput!): RoleResponse!
+  createTag(communitySlug: String!, data: CreateTagInput!): TagResponse!
   login(loginData: LoginUserInput!): LoggedUserResponse!
   register(data: RegisterUserInput!): LoggedUserResponse!
+  updateCommunity(id: String!, updateData: UpdateCommunityInput!): CommunityResponse!
+  updatePost(communitySlug: String!, id: String!, updateData: UpdatePostInput!): PostResponse
+  updateRole(id: String!, updateData: UpdateRoleInput!): RoleResponse
+  updateTag(communitySlug: String!, id: String!, updateData: UpdateTagInput!): TagResponse
   updateUser(_id: ObjectId!, updateData: EditMeInput!): UserResponse
 }
 
@@ -57,6 +168,12 @@ scalar ObjectId
 """The Posts model"""
 type Post {
   _id: ObjectId!
+
+  """
+  Post unique slug, combining the post slug with its community to use on url
+  """
+  canonicalComponents: String!
+  community: Community!
 
   """Post content"""
   content: String!
@@ -75,6 +192,7 @@ type Post {
 
   """Post slug to use on url"""
   slug: String!
+  tags: [Tag!]!
 
   """Post title"""
   title: String!
@@ -83,13 +201,47 @@ type Post {
   updatedAt: DateTime
 }
 
+type PostResponse {
+  errors: [ErrorResponse!]
+  post: Post
+}
+
+type PostsResponse {
+  errors: [ErrorResponse!]
+  posts: [Post!]
+}
+
 type Query {
+  communities: CommunitiesResponse!
+  community(slug: String!): CommunityResponse!
+
+  """Queries all posts in database"""
+  findAllPosts: PostsResponse!
+
   """Queries all users in database"""
   findAllUsers: UsersResponse!
+
+  """Queries an post by providing an email. If none is found, return null."""
+  findPostById(id: String!): PostResponse
+
+  """Queries an tag by providing an email. If none is found, return null."""
+  findTagBySlug(slug: String!): TagResponse
 
   """Queries an user by providing an email. If none is found, return null."""
   findUserByEmail(email: String!): UserResponse
   me: UserResponse
+
+  """Queries an role by providing an email. If none is found, return null."""
+  role(id: String!): RoleResponse
+
+  """Queries all roles in database"""
+  roles(communitySlug: String, userId: String): RolesResponse!
+
+  """Queries an tag by providing an email. If none is found, return null."""
+  tag(id: String!): TagResponse
+
+  """Queries all tags in database"""
+  tags: TagsResponse!
 }
 
 input RegisterUserInput {
@@ -106,9 +258,147 @@ input RegisterUserInput {
   surname: String
 }
 
+"""The Roles model"""
+type Role {
+  _id: ObjectId!
+  community: Community!
+
+  """User creation date"""
+  createdAt: DateTime!
+  isActive: Boolean!
+  removedAt: DateTime
+
+  """User role in community"""
+  role: RoleOptions!
+
+  """User last update date"""
+  updatedAt: DateTime
+  user: User!
+}
+
+"""The possible roles an user can assume in a community"""
+enum RoleOptions {
+  """
+  The user who created the community and thus have full access rights to the community
+  """
+  CREATOR
+
+  """
+  A user who is a free member of a community and have chosen to share its data with the community, to be notified of new unrestricted content
+  """
+  FOLLOWER
+
+  """
+  A user who is a paying member of a community, and have access to all its restricted content
+  """
+  MEMBER
+
+  """Super users that have full access rights to all communities"""
+  SUPER_ADMIN
+}
+
+type RoleResponse {
+  errors: [ErrorResponse!]
+  role: Role
+}
+
+type RolesResponse {
+  errors: [ErrorResponse!]
+  roles: [Role!]
+}
+
+"""The Tags model"""
+type Tag {
+  _id: ObjectId!
+
+  """
+  Tag unique slug, combining the tag slug with its community to use on url
+  """
+  canonicalComponents: String!
+  community: Community!
+
+  """Tag creation date"""
+  createdAt: DateTime!
+
+  """Tag description"""
+  description: String
+  isActive: Boolean!
+  posts: [Post!]!
+  removedAt: DateTime
+
+  """Tag slug to use on url"""
+  slug: String!
+
+  """Tag title"""
+  title: String!
+
+  """Tag last update date"""
+  updatedAt: DateTime
+}
+
+type TagResponse {
+  errors: [ErrorResponse!]
+  tag: Tag
+}
+
+type TagsResponse {
+  errors: [ErrorResponse!]
+  tags: [Tag!]
+}
+
+input UpdateCommunityInput {
+  """Community description"""
+  description: String
+
+  """Community title"""
+  logo: String
+
+  """Community slug to use on url"""
+  slug: String
+
+  """Community title"""
+  title: String
+}
+
+input UpdatePostInput {
+  """Post content"""
+  content: String
+
+  """Post description"""
+  description: String
+
+  """Post slug to use on url"""
+  slug: String
+
+  """Post content"""
+  tags: [ObjectId!]
+
+  """Post title"""
+  title: String
+}
+
+input UpdateRoleInput {
+  """User role in community"""
+  role: RoleOptions
+}
+
+input UpdateTagInput {
+  """Tag description"""
+  description: String
+
+  """Tag slug to use on url"""
+  slug: String
+
+  """Tag title"""
+  title: String
+}
+
 """The Users model"""
 type User {
   _id: ObjectId!
+
+  """User avatar image link"""
+  avatar: String
 
   """User creation date"""
   createdAt: DateTime!
@@ -121,6 +411,7 @@ type User {
   name: String!
   posts: [Post!]!
   removedAt: DateTime
+  roles: [Role!]!
 
   """User surname"""
   surname: String

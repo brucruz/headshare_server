@@ -1,4 +1,5 @@
 import mongoose, { Model } from 'mongoose';
+import { ObjectId } from 'mongodb';
 import {
   isActiveMongooseField,
   removedAtMongooseField,
@@ -25,6 +26,30 @@ const Schema = new mongoose.Schema(
     },
     description: {
       type: String,
+    },
+    posts: [
+      {
+        type: ObjectId,
+        ref: 'posts',
+      },
+    ],
+    roles: [
+      {
+        type: ObjectId,
+        ref: 'roles',
+      },
+    ],
+    creator: [
+      {
+        type: ObjectId,
+        ref: 'users',
+      },
+    ],
+    followersCount: {
+      type: Number,
+    },
+    membersCount: {
+      type: Number,
     },
     ...isActiveMongooseField,
     ...removedAtMongooseField,

@@ -13,54 +13,74 @@ import { ApolloContext } from '../../../apollo-server/ApolloContext';
 import isAuth from '../../../middlewares/isAuth';
 import CommunityModel from '../../communities/CommunityModel';
 import ICommunity from '../../communities/ICommunity';
-import ITag from '../../tags/ITag';
-import TagModel from '../../tags/TagModel';
-import { IUser } from '../../users/IUser';
-import UserModel from '../../users/UserModel';
-import CreatePostInput from '../inputs/CreatePostInput';
-import UpdatePostInput from '../inputs/UpdatePostInput';
-import PostModel from '../PostModel';
-import Post from '../PostType';
-import PostResponse from './PostResponse';
-import PostsResponse from './PostsResponse';
+import IPost from '../../posts/IPost';
+import PostModel from '../../posts/PostModel';
+import Post from '../../posts/PostType';
+import CreateTagInput from '../inputs/CreateTagInput';
+import UpdateTagInput from '../inputs/UpdateTagInput';
+import TagModel from '../TagModel';
+import Tag from '../TagType';
+import TagResponse from './TagResponse';
+import TagsResponse from './TagsResponse';
 
-@Resolver(_of => Post)
-export default class PostResolver {
-  @Query(() => PostsResponse, { description: 'Queries all posts in database' })
-  async findAllPosts(): Promise<PostsResponse> {
-    const posts = await PostModel.find();
+@Resolver(_of => Tag)
+export default class TagResolver {
+  @Query(() => TagsResponse, { description: 'Queries all tags in database' })
+  async tags(): Promise<TagsResponse> {
+    const tags = await TagModel.find({});
 
-    return { posts };
+    return { tags };
   }
 
-  @Query(() => PostResponse, {
+  @Query(() => TagResponse, {
     nullable: true,
     description:
-      'Queries an post by providing an email. If none is found, return null.',
+      'Queries an tag by providing an email. If none is found, return null.',
   })
-  async findPostById(@Arg('id') id: string): Promise<PostResponse> {
-    const post = await PostModel.findOne({ _id: new ObjectId(id) });
+  async tag(@Arg('id') id: string): Promise<TagResponse> {
+    const tag = await TagModel.findOne({ _id: new ObjectId(id) });
 
-    if (!post) {
+    if (!tag) {
       return {
         errors: [
           {
             field: 'id',
-            message: 'No post found with the informed id',
+            message: 'No Tag found with the informed id',
           },
         ],
       };
     }
-    return { post };
+    return { tag };
   }
 
-  @Mutation(_returns => PostResponse)
+  @Query(() => TagResponse, {
+    nullable: true,
+    description:
+      'Queries an tag by providing an email. If none is found, return null.',
+  })
+  async findTagBySlug(@Arg('slug') slug: string): Promise<TagResponse> {
+    const tag = await TagModel.findOne({ slug });
+
+    if (!tag) {
+      return {
+        errors: [
+          {
+            field: 'slug',
+            message: 'No Tag found with the informed slug',
+          },
+        ],
+      };
+    }
+    return { tag };
+  }
+
+  @Mutation(_returns => TagResponse)
   @UseMiddleware(isAuth)
-  async createPost(
+  async createTag(
     @Arg('communitySlug') communitySlug: string,
-    @Arg('data') { title, slug, description, content, tags }: CreatePostInput,
+    @Arg('data') { title, slug, description }: CreateTagInput,
     @Ctx() { req }: ApolloContext,
-  ): Promise<PostResponse> {
+  ): Promise<TagResponse> {
     const communityData = await CommunityModel.findOne({ slug: communitySlug });
     const community = communityData?._id;
 
@@ -69,7 +89,7 @@ export default class PostResolver {
         errors: [
           {
             field: 'community',
-            message: 'You must be connected to a community to post',
+            message: 'You must be connected to a community to create a tag',
           },
         ],
       };
@@ -90,7 +110,7 @@ export default class PostResolver {
 
     const canonicalComponents = `${communitySlug}/${slug}`;
 
-    const checkCanonicalDuplicate = await PostModel.findOne({
+    const checkCanonicalDuplicate = await TagModel.findOne({
       canonicalComponents,
     });
 
@@ -105,29 +125,26 @@ export default class PostResolver {
       };
     }
 
-    const post = new PostModel({
+    const tag = new TagModel({
       title,
       slug,
       canonicalComponents,
       description,
-      content,
-      tags,
       creator,
       community,
     });
 
-    await post.save();
+    await tag.save();
 
-    return { post };
+    return { tag };
   }
 
-  @Mutation(() => PostResponse, { nullable: true })
-  async updatePost(
+  @Mutation(() => TagResponse, { nullable: true })
+  async updateTag(
     @Arg('communitySlug') communitySlug: string,
     @Arg('id') id: string,
-    @Arg('updateData')
-    { title, slug, description, content, tags }: UpdatePostInput,
-  ): Promise<PostResponse> {
+    @Arg('updateData') { title, slug, description }: UpdateTagInput,
+  ): Promise<TagResponse> {
     const communityData = await CommunityModel.findOne({ slug: communitySlug });
     const community = communityData?._id;
 
@@ -136,7 +153,7 @@ export default class PostResolver {
         errors: [
           {
             field: 'community',
-            message: 'You must be connected to a community to edit a post',
+            message: 'You must be connected to a community to edit a Tag',
           },
         ],
       };
@@ -147,7 +164,7 @@ export default class PostResolver {
     if (slug) {
       canonicalComponents = `${communitySlug}/${slug}`;
 
-      const checkCanonicalDuplicate = await PostModel.findOne({
+      const checkCanonicalDuplicate = await TagModel.findOne({
         canonicalComponents,
       });
 
@@ -169,12 +186,10 @@ export default class PostResolver {
         ...(slug ? { slug } : {}),
         ...(canonicalComponents ? { canonicalComponents } : {}),
         ...(description ? { description } : {}),
-        ...(content ? { content } : {}),
-        ...(tags ? { tags } : {}),
       },
     };
 
-    const post = await PostModel.findOneAndUpdate(
+    const tag = await TagModel.findOneAndUpdate(
       {
         _id: new ObjectId(id),
       },
@@ -184,39 +199,30 @@ export default class PostResolver {
       },
     );
 
-    if (!post) {
+    if (!tag) {
       return {
         errors: [
           {
             field: 'id',
-            message: 'No post found with the informed id',
+            message: 'No Tag found with the informed id',
           },
         ],
       };
     }
 
-    await post.save();
+    await tag.save();
 
-    return { post };
-  }
-
-  @FieldResolver()
-  async creator(@Root() post: Post): Promise<IUser> {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return (await UserModel.findById(post._doc.creator))!;
-  }
-
-  @FieldResolver()
-  async community(@Root() post: Post): Promise<ICommunity> {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return (await CommunityModel.findById(post._doc.community))!;
+    return { tag };
   }
 
   @FieldResolver(() => [Post])
-  async tags(@Root() post: Post): Promise<ITag[]> {
-    const postTagsIds = post._doc.tags.map(tag => tag._id);
+  async posts(@Root() tag: Tag): Promise<IPost[]> {
+    return (await PostModel.find({ tags: tag._doc._id }))!;
+  }
 
+  @FieldResolver()
+  async community(@Root() tag: Tag): Promise<ICommunity> {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return (await TagModel.find({ _id: { $in: postTagsIds } }))!;
+    return (await CommunityModel.findById(tag._doc.community))!;
   }
 }

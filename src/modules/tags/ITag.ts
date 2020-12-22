@@ -1,18 +1,13 @@
 import { Document } from 'mongoose';
+import Community from '../communities/CommunityType';
 import Post from '../posts/PostType';
-import Role from '../roles/RoleType';
-import User from '../users/UserType';
 
-export default interface ICommunity extends Document {
-  logo?: string;
+export default interface ITag extends Document {
   title: string;
   slug: string;
   description?: string;
+  community: Community;
   posts: Post[];
-  roles: Role[];
-  creator: User;
-  followersCount: number;
-  membersCount: number;
   isActive: boolean;
   removedAt: Date | null;
   createdAt: Date;

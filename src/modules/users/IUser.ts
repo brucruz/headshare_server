@@ -1,5 +1,6 @@
 import { Document } from 'mongoose';
 import Post from '../posts/PostType';
+import Role from '../roles/RoleType';
 
 export interface IUser extends Document {
   name: string;
@@ -8,6 +9,7 @@ export interface IUser extends Document {
   email: string;
   avatar?: string;
   posts?: Post[];
+  roles?: Role[];
   isActive?: boolean;
   removedAt?: Date | null;
   createdAt?: Date;

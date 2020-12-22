@@ -9,9 +9,7 @@ import {
   Ctx,
   UseMiddleware,
 } from 'type-graphql';
-import { sign } from 'jsonwebtoken';
 import { verify } from 'argon2';
-import authConfig from '../../../config/auth';
 import ObjectIdScalar from '../../../type-graphql/ObjectIdScalar';
 import EditMeInput from '../inputs/EditMeInput';
 import { IUser } from '../IUser';
@@ -27,6 +25,10 @@ import UserResponse from './UserResponse';
 import UsersResponse from './UsersResponse';
 import LoggedUserResponse from './LoggedUserResponse';
 import Post from '../../posts/PostType';
+import generateJWTToken from './generateJWTToken';
+import Role from '../../roles/RoleType';
+import IRole from '../../roles/IRole';
+import RoleModel from '../../roles/RoleModel';
 
 @Resolver(() => User)
 export default class UserResolver {
@@ -145,12 +147,7 @@ export default class UserResolver {
         password,
       });
 
-      const { secret, expiresIn } = authConfig.jwt;
-
-      token = sign({}, secret, {
-        subject: user._id.toString(),
-        expiresIn,
-      });
+      token = generateJWTToken(user._id);
     } catch (err) {
       if (err.code === 11000 || err.message.includes('duplicate key error')) {
         return {
@@ -212,12 +209,7 @@ export default class UserResolver {
       };
     }
 
-    const { secret, expiresIn } = authConfig.jwt;
-
-    const token = sign({}, secret, {
-      subject: user._id.toString(),
-      expiresIn,
-    });
+    const token = generateJWTToken(user._id);
 
     return {
       data: {
@@ -274,5 +266,11 @@ export default class UserResolver {
   async posts(@Root() user: User): Promise<IPost[]> {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return (await PostModel.find({ creator: user._doc._id }))!;
+  }
+
+  @FieldResolver(() => [Role])
+  async roles(@Root() user: User): Promise<IRole[]> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return (await RoleModel.find({ user: user._doc._id }))!;
   }
 }
