@@ -6,9 +6,7 @@ import {
   Mutation,
   Root,
   FieldResolver,
-  UseMiddleware,
 } from 'type-graphql';
-import isAuth from '../../../middlewares/isAuth';
 import CommunityModel from '../../communities/CommunityModel';
 import ICommunity from '../../communities/ICommunity';
 import { IUser } from '../../users/IUser';
@@ -24,8 +22,9 @@ import RolesResponse from './RolesResponse';
 export default class RoleResolver {
   @Query(() => RolesResponse, { description: 'Queries all roles in database' })
   async roles(
-    @Arg('communitySlug', { nullable: true }) communitySlug?: string,
-    @Arg('userId', { nullable: true }) userId?: string,
+    @Arg('communitySlug', () => String, { nullable: true })
+    communitySlug?: string,
+    @Arg('userId', () => String, { nullable: true }) userId?: string,
   ): Promise<RolesResponse> {
     let community: ICommunity | null = null;
     let user: IUser | null = null;
@@ -77,7 +76,9 @@ export default class RoleResolver {
     description:
       'Queries an role by providing an email. If none is found, return null.',
   })
-  async role(@Arg('id') id: string): Promise<RoleResponse> {
+  async role(
+    @Arg('id', () => CreateRoleInput) id: string,
+  ): Promise<RoleResponse> {
     const role = await RoleModel.findOne({ _id: new ObjectId(id) });
 
     if (!role) {
@@ -95,7 +96,8 @@ export default class RoleResolver {
 
   @Mutation(_returns => RoleResponse)
   async createRole(
-    @Arg('data') { role, community, user }: CreateRoleInput,
+    @Arg('data', () => CreateRoleInput)
+    { role, community, user }: CreateRoleInput,
   ): Promise<RoleResponse> {
     const communityData = await CommunityModel.findById(community);
 
@@ -159,8 +161,8 @@ export default class RoleResolver {
 
   @Mutation(() => RoleResponse, { nullable: true })
   async updateRole(
-    @Arg('id') id: string,
-    @Arg('updateData')
+    @Arg('id', () => String) id: string,
+    @Arg('updateData', () => UpdateRoleInput)
     { role }: UpdateRoleInput,
   ): Promise<RoleResponse> {
     const newData = {

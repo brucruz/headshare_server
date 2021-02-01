@@ -1,6 +1,7 @@
 import { hash } from 'argon2';
 import { ObjectId } from 'mongodb';
 import { Field, ObjectType } from 'type-graphql';
+import DateTimeScalar from '../../type-graphql/DateTimeScalar';
 import ObjectIdScalar from '../../type-graphql/ObjectIdScalar';
 import Post from '../posts/PostType';
 import Role from '../roles/RoleType';
@@ -13,15 +14,18 @@ export default class User {
   @Field(() => String, { description: 'User name' })
   name: string;
 
-  @Field({ description: 'User surname', nullable: true })
+  @Field(() => String, { description: 'User surname', nullable: true })
   surname?: string;
 
-  @Field({ description: 'User email to be used on login' })
+  @Field(() => String, { description: 'User email to be used on login' })
   email: string;
 
   password?: string;
 
-  @Field({ description: 'User avatar image link', nullable: true })
+  @Field(() => String, {
+    description: 'User avatar image link',
+    nullable: true,
+  })
   avatar?: string;
 
   @Field(() => [Post])
@@ -32,16 +36,19 @@ export default class User {
 
   _doc?: any;
 
-  @Field()
+  @Field(() => Boolean)
   isActive: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => DateTimeScalar, { nullable: true })
   removedAt?: Date;
 
-  @Field({ description: 'User creation date' })
+  @Field(() => DateTimeScalar, { description: 'User creation date' })
   createdAt: Date;
 
-  @Field({ description: 'User last update date', nullable: true })
+  @Field(() => DateTimeScalar, {
+    description: 'User last update date',
+    nullable: true,
+  })
   updatedAt: Date;
 
   static async encryptPassword(password: string): Promise<string> {

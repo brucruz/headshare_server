@@ -1,12 +1,18 @@
 import { Field, InputType } from 'type-graphql';
 import ObjectIdScalar from '../../../type-graphql/ObjectIdScalar';
 import Tag from '../../tags/TagType';
-import Post from '../PostType';
+import { PostStatus } from '../IPost';
 
 @InputType()
-export default class UpdatePostInput implements Partial<Post> {
+export default class UpdatePostInput {
   @Field(() => String, { description: 'Post title', nullable: true })
   title?: string;
+
+  @Field(() => String, {
+    description: 'Post title with h1 tags',
+    nullable: true,
+  })
+  formattedTitle?: string;
 
   @Field(() => String, {
     description: 'Post slug to use on url',
@@ -20,9 +26,27 @@ export default class UpdatePostInput implements Partial<Post> {
   @Field(() => String, { description: 'Post content', nullable: true })
   content?: string;
 
+  @Field(_type => String, {
+    description: 'Post main media information',
+    nullable: true,
+  })
+  mainMedia?: string;
+
+  @Field(() => Boolean, {
+    description: 'If true, only exclusive members may view its content',
+    nullable: true,
+  })
+  exclusive?: boolean;
+
   @Field(() => [ObjectIdScalar], {
     description: 'Post content',
     nullable: true,
   })
   tags?: Tag[];
+
+  @Field(() => PostStatus, {
+    description: 'created post status',
+    nullable: true,
+  })
+  status?: PostStatus;
 }

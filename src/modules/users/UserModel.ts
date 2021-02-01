@@ -79,31 +79,31 @@ Schema.statics = {
   },
 };
 
-Schema.pre<IUser>('save', async function preSave() {
-  if (this.isModified('password') && this.password) {
-    this.password = await UserModel.encryptPassword(this.password);
-  }
-});
+// Schema.pre<IUser>('save', async function preSave() {
+//   if (this.isModified('password') && this.password) {
+//     this.password = await UserModel.encryptPassword(this.password);
+//   }
+// });
 
-async function preUpdate(this: any) {
-  const update = this.getUpdate();
-  if (update && update.password) {
-    update.password = await UserModel.encryptPassword(update.password);
-  }
-  if (update.$set && update.$set.password) {
-    update.$set.password = await UserModel.encryptPassword(
-      update.$set.password,
-    );
-  }
-}
+// async function preUpdate(this: any) {
+//   const update = this.getUpdate();
+//   if (update && update.password) {
+//     update.password = await UserModel.encryptPassword(update.password);
+//   }
+//   if (update.$set && update.$set.password) {
+//     update.$set.password = await UserModel.encryptPassword(
+//       update.$set.password,
+//     );
+//   }
+// }
 
-Schema.pre('update', preUpdate);
-Schema.pre('updateMany', preUpdate);
-Schema.pre('updateOne', preUpdate);
-Schema.pre('findOneAndUpdate', preUpdate);
+// Schema.pre('update', preUpdate);
+// Schema.pre('updateMany', preUpdate);
+// Schema.pre('updateOne', preUpdate);
+// Schema.pre('findOneAndUpdate', preUpdate);
 
-Schema.pre<IUser>('insertMany', async function preInsertMany() {
-  if (this.isModified('password') && this.password) {
-    this.password = await UserModel.encryptPassword(this.password);
-  }
-});
+// Schema.pre<IUser>('insertMany', async function preInsertMany() {
+//   if (this.isModified('password') && this.password) {
+//     this.password = await UserModel.encryptPassword(this.password);
+//   }
+// });

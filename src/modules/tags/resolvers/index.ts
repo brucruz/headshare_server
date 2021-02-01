@@ -6,22 +6,26 @@ import {
   Mutation,
   Root,
   FieldResolver,
-  UseMiddleware,
   Ctx,
+  Int,
 } from 'type-graphql';
 import { ApolloContext } from '../../../apollo-server/ApolloContext';
-import isAuth from '../../../middlewares/isAuth';
 import CommunityModel from '../../communities/CommunityModel';
 import ICommunity from '../../communities/ICommunity';
 import IPost from '../../posts/IPost';
 import PostModel from '../../posts/PostModel';
 import Post from '../../posts/PostType';
+import RoleModel from '../../roles/RoleModel';
 import CreateTagInput from '../inputs/CreateTagInput';
+import FindByTagsInput from '../inputs/FindByTagsInput';
+import FindByUserInput from '../inputs/FindByUserInput';
 import UpdateTagInput from '../inputs/UpdateTagInput';
 import TagModel from '../TagModel';
 import Tag from '../TagType';
 import TagResponse from './TagResponse';
 import TagsResponse from './TagsResponse';
+import transformSlug from '../../../utils/transformSlug';
+import PostOptionsInput from '../../posts/inputs/PostOptionsInput';
 
 @Resolver(_of => Tag)
 export default class TagResolver {
@@ -33,11 +37,10 @@ export default class TagResolver {
   }
 
   @Query(() => TagResponse, {
-    nullable: true,
     description:
       'Queries an tag by providing an email. If none is found, return null.',
   })
-  async tag(@Arg('id') id: string): Promise<TagResponse> {
+  async tag(@Arg('id', () => String) id: string): Promise<TagResponse> {
     const tag = await TagModel.findOne({ _id: new ObjectId(id) });
 
     if (!tag) {
@@ -54,11 +57,12 @@ export default class TagResolver {
   }
 
   @Query(() => TagResponse, {
-    nullable: true,
     description:
-      'Queries an tag by providing an email. If none is found, return null.',
+      'Queries an tag by providing an slug. If none is found, return null.',
   })
-  async findTagBySlug(@Arg('slug') slug: string): Promise<TagResponse> {
+  async findTagBySlug(
+    @Arg('slug', () => String) slug: string,
+  ): Promise<TagResponse> {
     const tag = await TagModel.findOne({ slug });
 
     if (!tag) {
@@ -74,11 +78,89 @@ export default class TagResolver {
     return { tag };
   }
 
+  @Query(() => TagResponse, {
+    description:
+      'Queries an tag by providing slugs. If none is found, return null.',
+  })
+  async findTagBySlugs(
+    @Arg('data', () => FindByTagsInput)
+    { communitySlug, tagSlug }: FindByTagsInput,
+  ): Promise<TagResponse> {
+    const community = await CommunityModel.findOne({ slug: communitySlug });
+
+    if (!community) {
+      return {
+        errors: [
+          {
+            field: 'communitySlug',
+            message: 'No community found with the informed slug',
+          },
+        ],
+      };
+    }
+
+    const tag = await TagModel.findOne({
+      slug: tagSlug,
+      community: community._id,
+    });
+
+    if (!tag) {
+      return {
+        errors: [
+          {
+            field: 'slug',
+            message: 'No Tag found with the informed slug',
+          },
+        ],
+      };
+    }
+    return { tag };
+  }
+
+  @Query(() => TagsResponse, {
+    description:
+      'Queries an tag by providing an user input. If none is found, return null.',
+  })
+  async findTagsByInput(
+    @Arg('data', () => FindByUserInput)
+    { communitySlug, userInput }: FindByUserInput,
+  ): Promise<TagsResponse> {
+    const community = await CommunityModel.findOne({ slug: communitySlug });
+
+    if (!community) {
+      return {
+        errors: [
+          {
+            field: 'communitySlug',
+            message: 'No community found with the informed slug',
+          },
+        ],
+      };
+    }
+
+    const tags = await TagModel.find({
+      title: { $regex: new RegExp(userInput, 'i') },
+      community: community._id,
+    });
+
+    if (tags.length < 1) {
+      return {
+        errors: [
+          {
+            field: 'slug',
+            message: 'No Tag found with the informed slug',
+          },
+        ],
+      };
+    }
+    return { tags };
+  }
+
   @Mutation(_returns => TagResponse)
-  @UseMiddleware(isAuth)
   async createTag(
-    @Arg('communitySlug') communitySlug: string,
-    @Arg('data') { title, slug, description }: CreateTagInput,
+    @Arg('communitySlug', () => String) communitySlug: string,
+    @Arg('data', () => CreateTagInput)
+    { title, slug: slugInput, description }: CreateTagInput,
     @Ctx() { req }: ApolloContext,
   ): Promise<TagResponse> {
     const communityData = await CommunityModel.findOne({ slug: communitySlug });
@@ -95,18 +177,33 @@ export default class TagResolver {
       };
     }
 
-    const creator = req.user?.id;
+    const creator = req.session.userId;
 
     if (!creator) {
       return {
         errors: [
           {
             field: 'id',
-            message: 'Invalid JWT token',
+            message: 'You must be logged in to perform this action',
           },
         ],
       };
     }
+
+    const isCreator = await RoleModel.isCreator(creator, community);
+
+    if (!isCreator) {
+      return {
+        errors: [
+          {
+            field: 'role',
+            message: 'Only community creators may perform this action',
+          },
+        ],
+      };
+    }
+
+    const slug = slugInput || transformSlug(title);
 
     const canonicalComponents = `${communitySlug}/${slug}`;
 
@@ -141,9 +238,11 @@ export default class TagResolver {
 
   @Mutation(() => TagResponse, { nullable: true })
   async updateTag(
-    @Arg('communitySlug') communitySlug: string,
-    @Arg('id') id: string,
-    @Arg('updateData') { title, slug, description }: UpdateTagInput,
+    @Arg('communitySlug', () => String) communitySlug: string,
+    @Arg('id', () => String) id: string,
+    @Arg('updateData', () => UpdateTagInput)
+    { title, slug, description }: UpdateTagInput,
+    @Ctx() { req }: ApolloContext,
   ): Promise<TagResponse> {
     const communityData = await CommunityModel.findOne({ slug: communitySlug });
     const community = communityData?._id;
@@ -154,6 +253,32 @@ export default class TagResolver {
           {
             field: 'community',
             message: 'You must be connected to a community to edit a Tag',
+          },
+        ],
+      };
+    }
+
+    const { userId } = req.session;
+
+    if (!userId) {
+      return {
+        errors: [
+          {
+            field: 'id',
+            message: 'You must be logged in to perform this action',
+          },
+        ],
+      };
+    }
+
+    const isCreator = await RoleModel.isCreator(userId, id);
+
+    if (!isCreator) {
+      return {
+        errors: [
+          {
+            field: 'role',
+            message: 'Only community creators may perform this action',
           },
         ],
       };
@@ -216,13 +341,64 @@ export default class TagResolver {
   }
 
   @FieldResolver(() => [Post])
-  async posts(@Root() tag: Tag): Promise<IPost[]> {
-    return (await PostModel.find({ tags: tag._doc._id }))!;
+  async posts(
+    @Root() tag: Tag,
+    @Arg('limit', () => Int) limit: number,
+    @Arg('cursor', () => String, { nullable: true }) cursor: Date | null,
+    @Arg('postOptions', () => PostOptionsInput, { nullable: true })
+    options: PostOptionsInput,
+  ): Promise<IPost[]> {
+    const realLimit = Math.min(50, limit);
+
+    const filters = {
+      ...(cursor
+        ? {
+            createdAt: {
+              $lt: cursor,
+            },
+          }
+        : {}),
+      ...(options?.status
+        ? {
+            status: options.status,
+          }
+        : {}),
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return (await PostModel.find({ tags: tag._doc._id, ...filters })
+      .sort({ createdAt: 'desc' })
+      .limit(realLimit))!;
   }
 
   @FieldResolver()
   async community(@Root() tag: Tag): Promise<ICommunity> {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return (await CommunityModel.findById(tag._doc.community))!;
+  }
+
+  @FieldResolver(() => Int)
+  async postCount(
+    @Root() tag: Tag,
+    @Arg('postOptions', () => PostOptionsInput, { nullable: true })
+    options: PostOptionsInput,
+  ): Promise<number> {
+    const filters = {
+      ...(options?.status
+        ? {
+            status: options.status,
+          }
+        : {}),
+    };
+
+    return PostModel.countDocuments(
+      { tags: tag._doc._id, ...filters },
+      function countPosts(err, count) {
+        if (err) {
+          return 0;
+        }
+        return count;
+      },
+    );
   }
 }

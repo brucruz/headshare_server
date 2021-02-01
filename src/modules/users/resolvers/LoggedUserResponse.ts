@@ -9,8 +9,8 @@ export class LoggedUser {
   @Field(() => User)
   user: IUser;
 
-  @Field()
-  token: string;
+  // @Field()
+  // token: string;
 }
 
 @ObjectType()

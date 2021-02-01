@@ -4,31 +4,44 @@ import {
   isActiveMongooseField,
   removedAtMongooseField,
 } from '../../mongoose/withMongooseFields';
-import IPost from './IPost';
+import IPost, { PostStatus } from './IPost';
 
 const Schema = new mongoose.Schema(
   {
     title: {
       type: String,
       trim: true,
-      required: true,
+    },
+    formattedTitle: {
+      type: String,
+      trim: true,
     },
     slug: {
       type: String,
       trim: true,
-      required: true,
     },
     canonicalComponents: {
       type: String,
       trim: true,
-      unique: true,
     },
     description: {
       type: String,
     },
+    status: {
+      type: String,
+      default: PostStatus.DRAFT,
+    },
+    mainMedia: {
+      type: ObjectId,
+      required: false,
+      ref: 'medias',
+    },
     content: {
       type: String,
-      required: true,
+    },
+    exclusive: {
+      type: Boolean,
+      default: false,
     },
     likes: {
       type: Number,

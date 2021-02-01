@@ -2,7 +2,6 @@ import { ObjectId } from 'mongodb';
 import {
   Resolver,
   Query,
-  UseMiddleware,
   Mutation,
   Arg,
   Ctx,
@@ -11,13 +10,17 @@ import {
   Int,
 } from 'type-graphql';
 import { ApolloContext } from '../../../apollo-server/ApolloContext';
-import isAuth from '../../../middlewares/isAuth';
+import IMedia from '../../medias/IMedia';
+import MediaModel from '../../medias/MediaModel';
 import IPost from '../../posts/IPost';
 import PostModel from '../../posts/PostModel';
 import Post from '../../posts/PostType';
 import IRole, { RoleOptions } from '../../roles/IRole';
 import RoleModel from '../../roles/RoleModel';
 import Role from '../../roles/RoleType';
+import ITag from '../../tags/ITag';
+import TagModel from '../../tags/TagModel';
+import Tag from '../../tags/TagType';
 import { IUser } from '../../users/IUser';
 import UserModel from '../../users/UserModel';
 import User from '../../users/UserType';
@@ -40,7 +43,9 @@ export default class CommunityResolver {
   }
 
   @Query(() => CommunityResponse)
-  async community(@Arg('slug') slug: string): Promise<CommunityResponse> {
+  async community(
+    @Arg('slug', () => String) slug: string,
+  ): Promise<CommunityResponse> {
     const community = await CommunityModel.findOne({ slug });
 
     if (!community) {
@@ -62,20 +67,19 @@ export default class CommunityResolver {
   @Mutation(() => CommunityResponse, {
     description: 'Users can create a community',
   })
-  @UseMiddleware(isAuth)
   async createCommunity(
-    @Arg('communityData')
+    @Arg('communityData', () => CreateCommunityInput)
     { logo, title, slug, description }: CreateCommunityInput,
     @Ctx() { req }: ApolloContext,
   ): Promise<CommunityResponse> {
-    const creator = req.user?.id;
+    const creator = req.session.userId;
 
     if (!creator) {
       return {
         errors: [
           {
-            field: 'token',
-            message: 'You must provide a valid JWT token to create a community',
+            field: 'userId',
+            message: 'You must be logged in to perform this action',
           },
         ],
       };
@@ -104,17 +108,80 @@ export default class CommunityResolver {
   }
 
   @Mutation(() => CommunityResponse)
-  @UseMiddleware(isAuth)
   async updateCommunity(
-    @Arg('id') id: string,
-    @Arg('updateData') { title, slug, description, logo }: UpdateCommunityInput,
+    @Arg('id', () => String) id: string,
+    @Arg('updateData', () => UpdateCommunityInput)
+    { title, slug, description, logo, avatar, banner }: UpdateCommunityInput,
+    @Ctx() { req }: ApolloContext,
   ): Promise<CommunityResponse> {
+    const { userId } = req.session;
+
+    if (!userId) {
+      return {
+        errors: [
+          {
+            field: 'userId',
+            message: 'You must be logged in to perform this action',
+          },
+        ],
+      };
+    }
+
+    const isCreator = await RoleModel.isCreator(userId, id);
+
+    if (!isCreator) {
+      return {
+        errors: [
+          {
+            field: 'role',
+            message: 'Only community creators may perform this action',
+          },
+        ],
+      };
+    }
+
+    let avatarObject;
+
+    if (avatar) {
+      avatarObject = await MediaModel.findById(avatar);
+
+      if (!avatarObject) {
+        return {
+          errors: [
+            {
+              field: 'avatar',
+              message: 'Media Id is incorrect',
+            },
+          ],
+        };
+      }
+    }
+
+    let bannerObject;
+
+    if (banner) {
+      bannerObject = await MediaModel.findById(banner);
+
+      if (!bannerObject) {
+        return {
+          errors: [
+            {
+              field: 'banner',
+              message: 'Media Id is incorrect',
+            },
+          ],
+        };
+      }
+    }
+
     const newData = {
       $set: {
         ...(title ? { title } : {}),
         ...(slug ? { slug } : {}),
         ...(description ? { description } : {}),
         ...(logo ? { logo } : {}),
+        ...(avatar && avatarObject ? { avatar: avatarObject?._id } : {}),
+        ...(banner && bannerObject ? { banner: bannerObject?._id } : {}),
       },
     };
 
@@ -154,6 +221,45 @@ export default class CommunityResolver {
   async roles(@Root() community: Community): Promise<IRole[]> {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return (await RoleModel.find({ community: community._doc._id }))!;
+  }
+
+  @FieldResolver(() => [Tag])
+  async tags(
+    @Root() community: Community,
+    @Arg('limit', () => Int) limit: number,
+    @Arg('cursor', () => String, { nullable: true }) cursor: Date | null,
+  ): Promise<ITag[]> {
+    const realLimit = Math.min(50, limit);
+
+    const cursorFilter = {
+      ...(cursor
+        ? {
+            createdAt: {
+              $lt: cursor,
+            },
+          }
+        : {}),
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return (await TagModel.find({
+      community: community._doc._id,
+      ...cursorFilter,
+    })
+      .sort({ createdAt: 'asc' })
+      .limit(realLimit))!;
+  }
+
+  @FieldResolver()
+  async banner(@Root() community: Community): Promise<IMedia> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return (await MediaModel.findById(community._doc.banner))!;
+  }
+
+  @FieldResolver()
+  async avatar(@Root() community: Community): Promise<IMedia> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return (await MediaModel.findById(community._doc.avatar))!;
   }
 
   @FieldResolver(() => User)

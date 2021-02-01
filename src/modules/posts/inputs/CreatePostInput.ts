@@ -1,21 +1,42 @@
+import { ObjectId } from 'mongoose';
 import { Field, InputType } from 'type-graphql';
 import ObjectIdScalar from '../../../type-graphql/ObjectIdScalar';
 import Tag from '../../tags/TagType';
-import Post from '../PostType';
 
 @InputType()
-export default class CreatePostInput implements Partial<Post> {
-  @Field(() => String, { description: 'Post title' })
-  title: string;
+export default class CreatePostInput {
+  @Field(() => String, { description: 'Post title', nullable: true })
+  title?: string;
 
-  @Field(() => String, { description: 'Post slug to use on url' })
-  slug: string;
+  @Field(() => String, {
+    description: 'Post title with h1 tags',
+    nullable: true,
+  })
+  formattedTitle?: string;
+
+  @Field(() => String, {
+    description: 'Post slug to use on url',
+    nullable: true,
+  })
+  slug?: string;
 
   @Field(() => String, { description: 'Post description', nullable: true })
   description?: string;
 
-  @Field(() => String, { description: 'Post content' })
-  content: string;
+  @Field(() => String, { description: 'Post content', nullable: true })
+  content?: string;
+
+  @Field(_type => ObjectIdScalar, {
+    description: 'Post main media information',
+    nullable: true,
+  })
+  mainMedia?: ObjectId;
+
+  @Field(() => Boolean, {
+    description: 'If true, only exclusive members may view its content',
+    nullable: true,
+  })
+  exclusive?: boolean;
 
   @Field(() => [ObjectIdScalar], {
     description: 'Post content',

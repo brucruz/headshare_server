@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
-import { Field, ObjectType } from 'type-graphql';
+import { Field, Int, ObjectType } from 'type-graphql';
+import DateTimeScalar from '../../type-graphql/DateTimeScalar';
 import ObjectIdScalar from '../../type-graphql/ObjectIdScalar';
 import Community from '../communities/CommunityType';
 import Post from '../posts/PostType';
@@ -30,17 +31,25 @@ export default class Tag {
   @Field(() => [Post])
   posts: Post[];
 
+  @Field(() => Int, {
+    description: 'The number of posts with this tag',
+  })
+  postCount: number;
+
   _doc?: any;
 
-  @Field()
+  @Field(() => Boolean)
   isActive: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => DateTimeScalar, { nullable: true })
   removedAt: Date;
 
-  @Field({ description: 'Tag creation date' })
+  @Field(() => DateTimeScalar, { description: 'Tag creation date' })
   createdAt: Date;
 
-  @Field({ description: 'Tag last update date', nullable: true })
+  @Field(() => DateTimeScalar, {
+    description: 'Tag last update date',
+    nullable: true,
+  })
   updatedAt: Date;
 }

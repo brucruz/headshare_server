@@ -37,6 +37,9 @@ const Schema = new mongoose.Schema(
         ref: 'posts',
       },
     ],
+    postCount: {
+      type: Number,
+    },
     ...isActiveMongooseField,
     ...removedAtMongooseField,
   },

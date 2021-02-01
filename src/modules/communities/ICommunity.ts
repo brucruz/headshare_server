@@ -1,6 +1,8 @@
 import { Document } from 'mongoose';
+import Media from '../medias/MediaType';
 import Post from '../posts/PostType';
 import Role from '../roles/RoleType';
+import Tag from '../tags/TagType';
 import User from '../users/UserType';
 
 export default interface ICommunity extends Document {
@@ -8,7 +10,10 @@ export default interface ICommunity extends Document {
   title: string;
   slug: string;
   description?: string;
+  avatar?: Media;
+  banner?: Media;
   posts: Post[];
+  tags: Tag[];
   roles: Role[];
   creator: User;
   followersCount: number;

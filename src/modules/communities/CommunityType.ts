@@ -1,8 +1,11 @@
 import { ObjectId } from 'mongodb';
 import { Field, Int, ObjectType } from 'type-graphql';
+import DateTimeScalar from '../../type-graphql/DateTimeScalar';
 import ObjectIdScalar from '../../type-graphql/ObjectIdScalar';
+import Media from '../medias/MediaType';
 import Post from '../posts/PostType';
 import Role from '../roles/RoleType';
+import Tag from '../tags/TagType';
 import User from '../users/UserType';
 
 @ObjectType({ description: 'The Communities model' })
@@ -22,8 +25,23 @@ export default class Community {
   @Field(() => String, { description: 'Community description', nullable: true })
   description?: string;
 
+  @Field(() => Media, {
+    description: 'Community avatar used to visually identify community info',
+    nullable: true,
+  })
+  avatar?: Media;
+
+  @Field(() => Media, {
+    description: 'Community image banner to be displayed in its homepage',
+    nullable: true,
+  })
+  banner?: Media;
+
   @Field(() => [Post])
   posts: Post[];
+
+  @Field(() => [Tag])
+  tags: Tag[];
 
   @Field(() => [Role])
   roles: Role[];
@@ -43,15 +61,18 @@ export default class Community {
 
   _doc?: any;
 
-  @Field()
+  @Field(() => Boolean)
   isActive: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => DateTimeScalar, { nullable: true })
   removedAt: Date;
 
-  @Field({ description: 'Community creation date' })
+  @Field(() => DateTimeScalar, { description: 'Community creation date' })
   createdAt: Date;
 
-  @Field({ description: 'Community last update date', nullable: true })
+  @Field(() => DateTimeScalar, {
+    description: 'Community last update date',
+    nullable: true,
+  })
   updatedAt: Date;
 }

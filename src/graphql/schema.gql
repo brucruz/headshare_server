@@ -12,6 +12,12 @@ type CommunitiesResponse {
 type Community {
   _id: ObjectId!
 
+  """Community avatar used to visually identify community info"""
+  avatar: Media
+
+  """Community image banner to be displayed in its homepage"""
+  banner: Media
+
   """Community creation date"""
   createdAt: DateTime!
 
@@ -36,6 +42,7 @@ type Community {
 
   """Community slug to use on url"""
   slug: String!
+  tags(cursor: String, limit: Int!): [Tag!]!
 
   """Community title"""
   title: String!
@@ -65,19 +72,28 @@ input CreateCommunityInput {
 
 input CreatePostInput {
   """Post content"""
-  content: String!
+  content: String
 
   """Post description"""
   description: String
 
+  """If true, only exclusive members may view its content"""
+  exclusive: Boolean
+
+  """Post title with h1 tags"""
+  formattedTitle: String
+
+  """Post main media information"""
+  mainMedia: ObjectId
+
   """Post slug to use on url"""
-  slug: String!
+  slug: String
 
   """Post content"""
   tags: [ObjectId!]
 
   """Post title"""
-  title: String!
+  title: String
 }
 
 input CreateRoleInput {
@@ -96,7 +112,7 @@ input CreateTagInput {
   description: String
 
   """Tag slug to use on url"""
-  slug: String!
+  slug: String
 
   """Tag title"""
   title: String!
@@ -129,8 +145,60 @@ type ErrorResponse {
   message: String!
 }
 
+"""Media file model"""
+type File {
+  """Media file extension"""
+  extension: String
+
+  """Media file name"""
+  name: String
+
+  """Media file size"""
+  size: Int
+
+  """Media file mime type"""
+  type: String
+}
+
+input FileInput {
+  """Media file extension"""
+  extension: String
+
+  """Media file name"""
+  name: String
+
+  """Media file size"""
+  size: Int
+
+  """Media file type"""
+  type: String
+}
+
+input FindBySlugsInput {
+  """Community slug"""
+  communitySlug: String!
+
+  """Post slug"""
+  postSlug: String!
+}
+
+input FindByTagsInput {
+  """Community slug"""
+  communitySlug: String!
+
+  """Tag slug"""
+  tagSlug: String!
+}
+
+input FindByUserInput {
+  """Community slug"""
+  communitySlug: String!
+
+  """User slug"""
+  userInput: String!
+}
+
 type LoggedUser {
-  token: String!
   user: User!
 }
 
@@ -147,6 +215,63 @@ input LoginUserInput {
   password: String
 }
 
+"""Media model"""
+type Media {
+  _id: ObjectId!
+  community: Community!
+
+  """Post creation date"""
+  createdAt: DateTime!
+
+  """Media internal description"""
+  description: String
+
+  """Media file information"""
+  file: File!
+
+  """Media format"""
+  format: MediaFormat!
+  isActive: Boolean!
+
+  """Media internal name"""
+  name: String
+  removedAt: DateTime
+
+  """Media thumbnail host url"""
+  thumbnailUrl: String
+
+  """Post last update date"""
+  updatedAt: DateTime
+
+  """Link through which the media file should be uploaded to"""
+  uploadLink: String!
+
+  """Media host url"""
+  url: String!
+}
+
+"""The possible formats a media might have"""
+enum MediaFormat {
+  """Audio only content"""
+  AUDIO
+
+  """Image only content"""
+  IMAGE
+
+  """Image and audio content"""
+  VIDEO
+}
+
+type MediaResponse {
+  errors: [ErrorResponse!]
+  media: Media
+}
+
+type MediasResponse {
+  errors: [ErrorResponse!]
+  medias: [Media!]
+}
+
 type Mutation {
   """Users can create a community"""
   createCommunity(communityData: CreateCommunityInput!): CommunityResponse!
@@ -154,12 +279,20 @@ type Mutation {
   createRole(data: CreateRoleInput!): RoleResponse!
   createTag(communitySlug: String!, data: CreateTagInput!): TagResponse!
   login(loginData: LoginUserInput!): LoggedUserResponse!
+  logout: Boolean!
   register(data: RegisterUserInput!): LoggedUserResponse!
   updateCommunity(id: String!, updateData: UpdateCommunityInput!): CommunityResponse!
   updatePost(communitySlug: String!, id: String!, updateData: UpdatePostInput!): PostResponse
+  updatePostMainMedia(communityId: String!, mainMediaData: UpdateMediaInput!, postId: String!): PostResponse!
   updateRole(id: String!, updateData: UpdateRoleInput!): RoleResponse
   updateTag(communitySlug: String!, id: String!, updateData: UpdateTagInput!): TagResponse
   updateUser(_id: ObjectId!, updateData: EditMeInput!): UserResponse
+
+  """Users can import a media"""
+  uploadImage(communitySlug: String!, imageData: UploadImageInput!): MediaResponse!
+
+  """Users can import a media"""
+  uploadVideo(communitySlug: String!, videoData: UploadMediaInput!): MediaResponse!
 }
 
 """Mongo object id scalar type"""
@@ -172,11 +305,11 @@ type Post {
   """
   Post unique slug, combining the post slug with its community to use on url
   """
-  canonicalComponents: String!
+  canonicalComponents: String
   community: Community!
 
   """Post content"""
-  content: String!
+  content: String
 
   """Post creation date"""
   createdAt: DateTime!
@@ -184,21 +317,38 @@ type Post {
 
   """Post description"""
   description: String
+
+  """True if only exclusive members can access its content"""
+  exclusive: Boolean
+
+  """Post title with h1 tags"""
+  formattedTitle: String
   isActive: Boolean!
 
   """Number of likes this post has received"""
   likes: Float
+
+  """Post main media information"""
+  mainMedia: Media
   removedAt: DateTime
 
   """Post slug to use on url"""
-  slug: String!
+  slug: String
+
+  """created post status"""
+  status: PostStatus
   tags: [Tag!]!
 
   """Post title"""
-  title: String!
+  title: String
 
   """Post last update date"""
   updatedAt: DateTime
+}
+
+input PostOptionsInput {
+  """Specifies which post status should be retrieved"""
+  status: PostStatus
 }
 
 type PostResponse {
@@ -211,25 +361,53 @@ type PostsResponse {
   posts: [Post!]
 }
 
+"""The possible status a post might have"""
+enum PostStatus {
+  """A post while is being written and visible only its creator"""
+  DRAFT
+
+  """
+  A post after been submited by its creator and now visible to every allowed member
+  """
+  PUBLISHED
+
+  """A post scheduled to be submited in a future date and hour"""
+  SCHEDULED
+}
+
 type Query {
+  """Queries all posts in database"""
+  allPosts: PostsResponse!
   communities: CommunitiesResponse!
   community(slug: String!): CommunityResponse!
-
-  """Queries all posts in database"""
-  findAllPosts: PostsResponse!
-
-  """Queries all users in database"""
-  findAllUsers: UsersResponse!
 
   """Queries an post by providing an email. If none is found, return null."""
   findPostById(id: String!): PostResponse
 
-  """Queries an tag by providing an email. If none is found, return null."""
-  findTagBySlug(slug: String!): TagResponse
+  """
+  Queries a post by providing community and post slugs. If none is found, return null.
+  """
+  findPostBySlugs(data: FindBySlugsInput!): PostResponse!
+
+  """Queries an tag by providing an slug. If none is found, return null."""
+  findTagBySlug(slug: String!): TagResponse!
+
+  """Queries an tag by providing slugs. If none is found, return null."""
+  findTagBySlugs(data: FindByTagsInput!): TagResponse!
+
+  """
+  Queries an tag by providing an user input. If none is found, return null.
+  """
+  findTagsByInput(data: FindByUserInput!): TagsResponse!
 
   """Queries an user by providing an email. If none is found, return null."""
   findUserByEmail(email: String!): UserResponse
   me: UserResponse
+  media(id: String!): MediaResponse!
+  medias: MediasResponse!
+
+  """Queries all posts in database"""
+  posts(cursor: String, limit: Int!): PostsResponse!
 
   """Queries an role by providing an email. If none is found, return null."""
   role(id: String!): RoleResponse
@@ -238,10 +416,13 @@ type Query {
   roles(communitySlug: String, userId: String): RolesResponse!
 
   """Queries an tag by providing an email. If none is found, return null."""
-  tag(id: String!): TagResponse
+  tag(id: String!): TagResponse!
 
   """Queries all tags in database"""
   tags: TagsResponse!
+
+  """Queries all users in database"""
+  users: UsersResponse!
 }
 
 input RegisterUserInput {
@@ -323,7 +504,10 @@ type Tag {
   """Tag description"""
   description: String
   isActive: Boolean!
-  posts: [Post!]!
+
+  """The number of posts with this tag"""
+  postCount(postOptions: PostOptionsInput): Int!
+  posts(cursor: String, limit: Int!, postOptions: PostOptionsInput): [Post!]!
   removedAt: DateTime
 
   """Tag slug to use on url"""
@@ -347,6 +531,12 @@ type TagsResponse {
 }
 
 input UpdateCommunityInput {
+  """Community avatar used to visually identify community info"""
+  avatar: String
+
+  """Community image banner to be displayed in its homepage"""
+  banner: String
+
   """Community description"""
   description: String
 
@@ -360,6 +550,26 @@ input UpdateCommunityInput {
   title: String
 }
 
+input UpdateMediaInput {
+  """Media internal description"""
+  description: String
+
+  """Media file information"""
+  file: FileInput
+
+  """Media format"""
+  format: MediaFormat
+
+  """Media internal name"""
+  name: String
+
+  """Media thumbnail picture url"""
+  thumbnailUrl: String
+
+  """Media url"""
+  url: String
+}
+
 input UpdatePostInput {
   """Post content"""
   content: String
@@ -367,8 +577,20 @@ input UpdatePostInput {
   """Post description"""
   description: String
 
+  """If true, only exclusive members may view its content"""
+  exclusive: Boolean
+
+  """Post title with h1 tags"""
+  formattedTitle: String
+
+  """Post main media information"""
+  mainMedia: String
+
   """Post slug to use on url"""
   slug: String
+
+  """created post status"""
+  status: PostStatus
 
   """Post content"""
   tags: [ObjectId!]
@@ -391,6 +613,40 @@ input UpdateTagInput {
 
   """Tag title"""
   title: String
+}
+
+input UploadImageInput {
+  """Media internal description"""
+  description: String
+
+  """Media file information"""
+  file: FileInput!
+
+  """Media format"""
+  format: MediaFormat!
+
+  """Media internal name"""
+  name: String
+
+  """Media thumbnail picture url"""
+  thumbnailUrl: String
+}
+
+input UploadMediaInput {
+  """Media internal description"""
+  description: String
+
+  """Media file information"""
+  file: FileInput!
+
+  """Media format"""
+  format: MediaFormat!
+
+  """Media internal name"""
+  name: String
+
+  """Media thumbnail picture url"""
+  thumbnailUrl: String
 }
 
 """The Users model"""

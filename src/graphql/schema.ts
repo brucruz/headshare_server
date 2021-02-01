@@ -5,8 +5,10 @@ import CommunityResolver from '../modules/communities/resolvers';
 import PostResolver from '../modules/posts/resolvers';
 import UserResolver from '../modules/users/resolvers';
 import ObjectIdScalar from '../type-graphql/ObjectIdScalar';
+import DateTimeScalar from '../type-graphql/DateTimeScalar';
 import TagResolver from '../modules/tags/resolvers';
 import RoleResolver from '../modules/roles/resolvers';
+import MediaResolver from '../modules/medias/resolvers';
 
 const { ObjectId } = mongoose.Schema.Types;
 
@@ -17,9 +19,14 @@ const schema = buildSchema({
     CommunityResolver,
     TagResolver,
     RoleResolver,
+    MediaResolver,
   ],
   emitSchemaFile: path.resolve(__dirname, 'schema.gql'),
-  scalarsMap: [{ type: ObjectId, scalar: ObjectIdScalar }],
+  // dateScalarMode: 'isoDate',
+  scalarsMap: [
+    { type: ObjectId, scalar: ObjectIdScalar },
+    { type: Date, scalar: DateTimeScalar },
+  ],
   validate: false,
 });
 

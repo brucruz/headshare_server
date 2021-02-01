@@ -27,10 +27,24 @@ const Schema = new mongoose.Schema(
     description: {
       type: String,
     },
+    avatar: {
+      type: ObjectId,
+      ref: 'medias',
+    },
+    banner: {
+      type: ObjectId,
+      ref: 'medias',
+    },
     posts: [
       {
         type: ObjectId,
         ref: 'posts',
+      },
+    ],
+    tags: [
+      {
+        type: ObjectId,
+        ref: 'tags',
       },
     ],
     roles: [

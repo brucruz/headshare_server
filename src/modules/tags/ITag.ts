@@ -8,6 +8,7 @@ export default interface ITag extends Document {
   description?: string;
   community: Community;
   posts: Post[];
+  postCount: number;
   isActive: boolean;
   removedAt: Date | null;
   createdAt: Date;

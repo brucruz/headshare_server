@@ -7,9 +7,8 @@ import {
   FieldResolver,
   Root,
   Ctx,
-  UseMiddleware,
 } from 'type-graphql';
-import { verify } from 'argon2';
+import { hash, verify } from 'argon2';
 import ObjectIdScalar from '../../../type-graphql/ObjectIdScalar';
 import EditMeInput from '../inputs/EditMeInput';
 import { IUser } from '../IUser';
@@ -20,33 +19,31 @@ import LoginUserInput from '../inputs/LoginUserInput';
 import PostModel from '../../posts/PostModel';
 import IPost from '../../posts/IPost';
 import { ApolloContext } from '../../../apollo-server/ApolloContext';
-import isAuth from '../../../middlewares/isAuth';
 import UserResponse from './UserResponse';
 import UsersResponse from './UsersResponse';
 import LoggedUserResponse from './LoggedUserResponse';
 import Post from '../../posts/PostType';
-import generateJWTToken from './generateJWTToken';
 import Role from '../../roles/RoleType';
 import IRole from '../../roles/IRole';
 import RoleModel from '../../roles/RoleModel';
+import { COOKIE_NAME } from '../../../constants';
 
 @Resolver(() => User)
 export default class UserResolver {
-  @UseMiddleware(isAuth)
   @Query(() => UserResponse, { nullable: true })
   public async me(@Ctx() { req }: ApolloContext): Promise<UserResponse> {
-    if (!req.user) {
+    if (!req.session.userId) {
       return {
         errors: [
           {
             field: 'id',
-            message: 'Invalid JWT token',
+            message: 'User not logged in',
           },
         ],
       };
     }
 
-    const userId = req.user.id;
+    const { userId } = req.session;
 
     const user = await UserModel.findById(userId);
 
@@ -67,7 +64,7 @@ export default class UserResolver {
   }
 
   @Query(() => UsersResponse, { description: 'Queries all users in database' })
-  public async findAllUsers(): Promise<UsersResponse> {
+  public async users(): Promise<UsersResponse> {
     const users = await UserModel.find();
 
     return { users };
@@ -79,7 +76,7 @@ export default class UserResolver {
       'Queries an user by providing an email. If none is found, return null.',
   })
   public async findUserByEmail(
-    @Arg('email') email: string,
+    @Arg('email', () => String) email: string,
   ): Promise<UserResponse> {
     const user = await UserModel.findOne({ email });
 
@@ -99,7 +96,9 @@ export default class UserResolver {
 
   @Mutation(() => LoggedUserResponse)
   async register(
-    @Arg('data') { name, surname, email, password }: RegisterUserInput,
+    @Arg('data', () => RegisterUserInput)
+    { name, surname, email, password }: RegisterUserInput,
+    @Ctx() { req }: ApolloContext,
   ): Promise<LoggedUserResponse> {
     if (email.length <= 2) {
       return {
@@ -137,17 +136,18 @@ export default class UserResolver {
     }
 
     let user = {} as IUser;
-    let token = '';
+    // let token = '';
 
     try {
-      user = await UserModel.create({
+      user = new UserModel({
         name,
         surname,
         email: email.toLowerCase(),
-        password,
+        password: await hash(password),
       });
 
-      token = generateJWTToken(user._id);
+      // token = generateJWTToken(user._id);
+      req.session.userId = user.id;
     } catch (err) {
       if (err.code === 11000 || err.message.includes('duplicate key error')) {
         return {
@@ -163,14 +163,15 @@ export default class UserResolver {
     return {
       data: {
         user,
-        token,
+        // token,
       },
     };
   }
 
   @Mutation(() => LoggedUserResponse)
   async login(
-    @Arg('loginData') { email, password }: LoginUserInput,
+    @Arg('loginData', () => LoginUserInput) { email, password }: LoginUserInput,
+    @Ctx() { req }: ApolloContext,
   ): Promise<LoggedUserResponse> {
     const user = await UserModel.findOne({ email });
 
@@ -209,12 +210,14 @@ export default class UserResolver {
       };
     }
 
-    const token = generateJWTToken(user._id);
+    // const token = generateJWTToken(user._id);
+
+    req.session.userId = user.id;
 
     return {
       data: {
         user,
-        token,
+        // token,
       },
     };
   }
@@ -222,14 +225,15 @@ export default class UserResolver {
   @Mutation(() => UserResponse, { nullable: true })
   async updateUser(
     @Arg('_id', () => ObjectIdScalar) _id: ObjectId,
-    @Arg('updateData') { name, surname, email, password, avatar }: EditMeInput,
+    @Arg('updateData', () => EditMeInput)
+    { name, surname, email, password, avatar }: EditMeInput,
   ): Promise<UserResponse> {
     const newData = {
       $set: {
         ...(name ? { name } : {}),
         ...(surname ? { surname } : {}),
         ...(email ? { email } : {}),
-        ...(password ? { password } : {}),
+        ...(password ? { password: await hash(password) } : {}),
         ...(avatar ? { avatar } : {}),
       },
     };
@@ -260,6 +264,25 @@ export default class UserResolver {
     return {
       user,
     };
+  }
+
+  @Mutation(() => Boolean)
+  logout(@Ctx() { req, res }: ApolloContext): Promise<boolean> {
+    return new Promise(resolve => {
+      req.session.destroy(err => {
+        res.clearCookie(COOKIE_NAME);
+
+        if (err) {
+          console.log(err);
+
+          resolve(false);
+
+          return;
+        }
+
+        resolve(true);
+      });
+    });
   }
 
   @FieldResolver(() => [Post])

@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { Field, ObjectType } from 'type-graphql';
+import DateTimeScalar from '../../type-graphql/DateTimeScalar';
 import ObjectIdScalar from '../../type-graphql/ObjectIdScalar';
 import Community from '../communities/CommunityType';
 import User from '../users/UserType';
@@ -21,15 +22,18 @@ export default class Role {
 
   _doc?: any;
 
-  @Field()
+  @Field(() => Boolean)
   isActive: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => DateTimeScalar, { nullable: true })
   removedAt?: Date;
 
-  @Field({ description: 'User creation date' })
+  @Field(() => DateTimeScalar, { description: 'User creation date' })
   createdAt: Date;
 
-  @Field({ description: 'User last update date', nullable: true })
+  @Field(() => DateTimeScalar, {
+    description: 'User last update date',
+    nullable: true,
+  })
   updatedAt: Date;
 }

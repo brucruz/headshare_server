@@ -21,6 +21,9 @@ export default class EditMeInput implements Partial<IUser> {
   })
   password?: string;
 
-  @Field({ description: 'User avatar image link', nullable: true })
+  @Field(() => String, {
+    description: 'User avatar image link',
+    nullable: true,
+  })
   avatar?: string;
 }

@@ -1,5 +1,5 @@
 declare namespace NodeJS {
-  interface Global {
+  export interface Global {
     __COUNTERS__: {
       user: number;
       post: number;

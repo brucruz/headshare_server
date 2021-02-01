@@ -2,9 +2,9 @@ import { Field, ObjectType } from 'type-graphql';
 
 @ObjectType()
 export default class ErrorResponse {
-  @Field()
+  @Field(() => String)
   field: string;
 
-  @Field()
+  @Field(() => String)
   message: string;
 }
