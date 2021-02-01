@@ -51,7 +51,12 @@ const main = async () => {
   app.use(
     session({
       name: 'qid',
-      store: new RedisStore({ client: redisClient }),
+      store: new RedisStore({
+        client: redisClient,
+        pass: process.env.REDIS_PASSWORD,
+        // eslint-disable-next-line radix
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+      }),
       secret: process.env.APP_SECRET || 'very-secret-secret',
       resave: false,
       saveUninitialized: false,
