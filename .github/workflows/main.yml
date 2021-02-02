@@ -48,6 +48,23 @@ jobs:
           target: "~/app/headshare_server"
       
       # Install yarn dependencies in server
+      - name: install dependencies on Digital Ocean
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/app/headshare_server
+            yarn
         
-      # Run migrations
-      # Restart nodejs server
+      # Restart nodejs server,
+      - name: install dependencies on Digital Ocean
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_KEY }}
+          script: pm2 restart headshare-api
