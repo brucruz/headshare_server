@@ -59,8 +59,8 @@ jobs:
             cd ~/app/headshare_server
             yarn
         
-      # Restart nodejs server,
-      - name: install dependencies on Digital Ocean
+      # Restart nodejs server
+      - name: restart nodejs server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
