@@ -146,7 +146,8 @@ export default class UserResolver {
         password: await hash(password),
       });
 
-      // token = generateJWTToken(user._id);
+      await user.save();
+
       req.session.userId = user.id;
     } catch (err) {
       if (err.code === 11000 || err.message.includes('duplicate key error')) {
@@ -163,7 +164,6 @@ export default class UserResolver {
     return {
       data: {
         user,
-        // token,
       },
     };
   }

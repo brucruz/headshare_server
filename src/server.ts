@@ -47,7 +47,10 @@ const main = async () => {
 
   const RedisStore = connectRedis(session);
   const redisClient = redis.createClient({
-    password: process.env.REDIS_PASSWORD,
+    password:
+      process.env.REDIS_PASSWORD === ''
+        ? undefined
+        : process.env.REDIS_PASSWORD,
     // eslint-disable-next-line radix
     port: parseInt(process.env.REDIS_PORT || '6379'),
   });
