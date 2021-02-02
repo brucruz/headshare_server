@@ -37,7 +37,7 @@ jobs:
         run: yarn build
         
       # Copy code to Digital Ocean server
-      - name: copy dist to Digital Ocean server
+      - name: Copy dist to Digital Ocean server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -48,7 +48,7 @@ jobs:
           target: "~/app/headshare_server"
       
       # Install yarn dependencies in server
-      - name: install dependencies on Digital Ocean
+      - name: Install dependencies on Digital Ocean and Restart server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -58,13 +58,4 @@ jobs:
           script: |
             cd ~/app/headshare_server
             yarn
-        
-      # Restart nodejs server
-      - name: restart nodejs server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          port: ${{ secrets.SSH_PORT }}
-          key: ${{ secrets.SSH_KEY }}
-          script: pm2 restart headshare-api
+            pm2 restart headshare-api
