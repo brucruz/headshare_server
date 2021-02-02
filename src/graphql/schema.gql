@@ -410,7 +410,7 @@ type Query {
   posts(cursor: String, limit: Int!): PostsResponse!
 
   """Queries an role by providing an email. If none is found, return null."""
-  role(id: String!): RoleResponse
+  role(id: CreateRoleInput!): RoleResponse
 
   """Queries all roles in database"""
   roles(communitySlug: String, userId: String): RolesResponse!
