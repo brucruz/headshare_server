@@ -79,6 +79,8 @@ const main = async () => {
     }),
   );
 
+  console.log(process.env.ENVIRONMENT);
+
   apolloServer.applyMiddleware({ app, cors: false });
 
   // eslint-disable-next-line radix
