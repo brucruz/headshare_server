@@ -9,6 +9,7 @@ import session from 'express-session';
 import connectRedis from 'connect-redis';
 
 import schema from './graphql/schema';
+import { __prod__, COOKIE_NAME } from './constants';
 
 const main = async () => {
   const mongodbUsername = process.env.MONGODB_USERNAME;
@@ -57,11 +58,18 @@ const main = async () => {
     port: parseInt(process.env.REDIS_PORT || '6379'),
   });
 
+  console.log('__prod__: ', __prod__);
+
+  const domain = __prod__ ? '.headshare.app' : undefined;
+
+  console.log('domain: ', domain);
+
   app.use(
     session({
-      name: 'qid',
+      name: COOKIE_NAME,
       store: new RedisStore({
         client: redisClient,
+        disableTouch: true,
       }),
       secret: process.env.APP_SECRET || 'very-secret-secret',
       resave: false,
@@ -69,17 +77,13 @@ const main = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
         httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.ENVIRONMENT === 'production', // cookie only works in https
-        domain:
-          process.env.ENVIRONMENT === 'production'
-            ? '.headshare.app'
-            : undefined, // cookie only works in https
+        // sameSite: 'lax',
+        sameSite: 'none',
+        secure: __prod__, // cookie only works in https
+        domain, // cookie only works in https
       },
     }),
   );
-
-  console.log(process.env.ENVIRONMENT);
 
   apolloServer.applyMiddleware({ app, cors: false });
 
