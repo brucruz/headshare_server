@@ -173,8 +173,6 @@ export default class UserResolver {
   ): Promise<LoggedUserResponse> {
     const user = await UserModel.findOne({ email });
 
-    console.log('found user? ', user);
-
     if (!user) {
       return {
         errors: [
@@ -199,8 +197,6 @@ export default class UserResolver {
 
     const correctPassword = await verify(user.password, password);
 
-    console.log('correct password? ', correctPassword);
-
     if (!correctPassword) {
       return {
         errors: [
@@ -213,8 +209,6 @@ export default class UserResolver {
     }
 
     req.session.userId = user.id;
-
-    console.log('req.session: ', req.session);
 
     return {
       user,

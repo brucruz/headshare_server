@@ -38,6 +38,8 @@ const main = async () => {
     context: ({ req, res }) => ({ req, res }),
   });
   const app = Express();
+
+  app.set('trust proxy', 1);
   app.use(
     cors({
       origin: process.env.APP_WEB_URL,
