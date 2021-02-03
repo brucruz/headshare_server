@@ -77,10 +77,10 @@ const main = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
         httpOnly: true,
-        // sameSite: 'lax',
-        sameSite: 'none',
+        sameSite: 'lax',
+        // sameSite: 'none',
         secure: __prod__, // cookie only works in https
-        domain, // cookie only works in https
+        // domain,
       },
     }),
   );
