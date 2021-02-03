@@ -4,7 +4,6 @@ import {
   isActiveMongooseField,
   removedAtMongooseField,
 } from '../../mongoose/withMongooseFields';
-import UserModel from '../users/UserModel';
 import IRole, { RoleOptions } from './IRole';
 
 const Schema = new mongoose.Schema(

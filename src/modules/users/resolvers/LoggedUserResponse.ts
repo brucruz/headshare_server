@@ -5,19 +5,10 @@ import FieldError from '../../shared/ErrorResponse';
 import User from '../UserType';
 
 @ObjectType()
-export class LoggedUser {
-  @Field(() => User)
-  user: IUser;
-
-  // @Field()
-  // token: string;
-}
-
-@ObjectType()
 export default class LoggedUserResponse {
   @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
 
-  @Field(() => LoggedUser, { nullable: true })
-  data?: LoggedUser;
+  @Field(() => User, { nullable: true })
+  user?: IUser;
 }

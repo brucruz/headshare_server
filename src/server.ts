@@ -74,6 +74,7 @@ const main = async () => {
   );
 
   apolloServer.applyMiddleware({ app, cors: false });
+
   // eslint-disable-next-line radix
   app.listen({ port: parseInt(process.env.PORT || '4000') }, () =>
     console.log(

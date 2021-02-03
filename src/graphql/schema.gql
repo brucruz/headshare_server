@@ -198,13 +198,9 @@ input FindByUserInput {
   userInput: String!
 }
 
-type LoggedUser {
-  user: User!
-}
-
 type LoggedUserResponse {
-  data: LoggedUser
   errors: [ErrorResponse!]
+  user: User
 }
 
 input LoginUserInput {

@@ -162,9 +162,7 @@ export default class UserResolver {
       }
     }
     return {
-      data: {
-        user,
-      },
+      user,
     };
   }
 
@@ -219,9 +217,7 @@ export default class UserResolver {
     console.log('req.session: ', req.session);
 
     return {
-      data: {
-        user,
-      },
+      user,
     };
   }
 
