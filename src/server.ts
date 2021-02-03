@@ -71,6 +71,10 @@ const main = async () => {
         httpOnly: true,
         sameSite: 'lax',
         secure: process.env.ENVIRONMENT === 'production', // cookie only works in https
+        domain:
+          process.env.ENVIRONMENT === 'production'
+            ? 'headshare.app'
+            : undefined, // cookie only works in https
       },
     }),
   );
