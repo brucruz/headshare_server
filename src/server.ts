@@ -73,7 +73,7 @@ const main = async () => {
         secure: process.env.ENVIRONMENT === 'production', // cookie only works in https
         domain:
           process.env.ENVIRONMENT === 'production'
-            ? 'headshare.app'
+            ? '.headshare.app'
             : undefined, // cookie only works in https
       },
     }),
