@@ -373,7 +373,7 @@ enum PostStatus {
 
 type Query {
   """Queries all posts in database"""
-  allPosts: PostsResponse!
+  allPosts(postOptions: PostOptionsInput): PostsResponse!
   communities: CommunitiesResponse!
   community(slug: String!): CommunityResponse!
 

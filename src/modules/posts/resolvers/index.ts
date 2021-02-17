@@ -30,6 +30,7 @@ import PostModel from '../PostModel';
 import Post from '../PostType';
 import PostResponse from './PostResponse';
 import PostsResponse from './PostsResponse';
+import PostOptionsInput from '../inputs/PostOptionsInput';
 
 @Resolver(_of => Post)
 export default class PostResolver {
@@ -58,8 +59,21 @@ export default class PostResolver {
   }
 
   @Query(() => PostsResponse, { description: 'Queries all posts in database' })
-  async allPosts(): Promise<PostsResponse> {
-    const posts = await PostModel.find();
+  async allPosts(
+    @Arg('postOptions', () => PostOptionsInput, { nullable: true })
+    options: PostOptionsInput,
+  ): Promise<PostsResponse> {
+    const filters = {
+      ...(options?.status
+        ? {
+            status: options.status,
+          }
+        : {}),
+    };
+
+    const posts = await PostModel.find({
+      ...filters,
+    });
 
     return { posts };
   }
