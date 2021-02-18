@@ -43,7 +43,10 @@ const main = async () => {
   app.set('trust proxy', 1);
   app.use(
     cors({
-      origin: process.env.APP_WEB_URL,
+      origin: __prod__
+        ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          [process.env.APP_WEB_URL!, 'https://vercel.app']
+        : process.env.APP_WEB_URL,
       credentials: true,
     }),
   );
@@ -58,11 +61,7 @@ const main = async () => {
     port: parseInt(process.env.REDIS_PORT || '6379'),
   });
 
-  console.log('__prod__: ', __prod__);
-
   const domain = __prod__ ? '.headshare.app' : undefined;
-
-  console.log('domain: ', domain);
 
   app.use(
     session({
