@@ -366,7 +366,7 @@ export default class PostResolver {
         ...(description ? { description } : {}),
         ...(content ? { content } : {}),
         ...(formattedTitle ? { formattedTitle } : {}),
-        ...(exclusive ? { exclusive } : {}),
+        ...(typeof exclusive !== 'undefined' ? { exclusive } : {}),
         ...(status ? { status } : {}),
         ...(tags ? { tags } : {}),
         ...(mainMedia && mainMediaObject
