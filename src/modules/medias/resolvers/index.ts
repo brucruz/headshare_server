@@ -10,6 +10,7 @@ import CommunityModel from '../../communities/CommunityModel';
 import RoleModel from '../../roles/RoleModel';
 import S3StorageProvider from '../../shared/providers/StorageProvider/implementations/S3StorageProvider';
 import UploadImageInput from './input/UploadImageInput';
+import PostModel from '../../posts/PostModel';
 
 @Resolver(_of => Media)
 export default class MediaResolver {
@@ -281,4 +282,132 @@ export default class MediaResolver {
       };
     }
   }
+
+  // @Mutation(() => MediaResponse, {
+  //   description: 'Users can upload a image directly as a post main media',
+  // })
+  // async uploadImageAsMain(
+  //   @Arg('communitySlug', () => String) communitySlug: string,
+  //   @Arg('postId', () => String) postId: string,
+  //   @Arg('imageData', () => UploadImageInput)
+  //   { format, thumbnailUrl, name, description, file }: UploadImageInput,
+  //   @Ctx() { req }: ApolloContext,
+  // ): Promise<MediaResponse> {
+  //   const communityData = await CommunityModel.findOne({ slug: communitySlug });
+  //   const community = communityData?._id;
+
+  //   if (!community) {
+  //     return {
+  //       errors: [
+  //         {
+  //           field: 'community',
+  //           message:
+  //             'You must be connected to a community to perform this action',
+  //         },
+  //       ],
+  //     };
+  //   }
+
+  //   const creator = req.session.userId;
+
+  //   if (!creator) {
+  //     return {
+  //       errors: [
+  //         {
+  //           field: 'auth',
+  //           message: 'You must be logged in to perform this action',
+  //         },
+  //       ],
+  //     };
+  //   }
+
+  //   const isCreator = await RoleModel.isCreator(creator, community);
+
+  //   if (!isCreator) {
+  //     return {
+  //       errors: [
+  //         {
+  //           field: 'role',
+  //           message: 'Only community creators may perform this action',
+  //         },
+  //       ],
+  //     };
+  //   }
+
+  //   if (format !== 'image') {
+  //     return {
+  //       errors: [
+  //         {
+  //           field: 'format',
+  //           message: 'Invalid media format',
+  //         },
+  //       ],
+  //     };
+  //   }
+
+  //   const storageProvider = new S3StorageProvider();
+
+  //   if (!file.name) {
+  //     return {
+  //       errors: [
+  //         {
+  //           field: 'fileName',
+  //           message: 'Filename is missing',
+  //         },
+  //       ],
+  //     };
+  //   }
+
+  //   if (!file.type) {
+  //     return {
+  //       errors: [
+  //         {
+  //           field: 'fileType',
+  //           message: 'Filetype is missing',
+  //         },
+  //       ],
+  //     };
+  //   }
+
+  //   try {
+  //     const result = await storageProvider.createSignedRequest(
+  //       file.name,
+  //       file.type,
+  //     );
+
+  //     const media = new MediaModel({
+  //       format,
+  //       url: result.url,
+  //       thumbnailUrl,
+  //       name,
+  //       description,
+  //       file,
+  //       uploadLink: result.signedRequest,
+  //       community,
+  //     });
+
+  //     await media.save();
+
+  //     const updatedPost = await PostModel.findByIdAndUpdate(postId, {
+  //       $set: {
+  //         ...{ mainMedia: media._id },
+  //       },
+  //     });
+
+  //     console.log(updatedPost);
+
+  //     return {
+  //       media,
+  //     };
+  //   } catch (err) {
+  //     return {
+  //       errors: [
+  //         {
+  //           field: 'none',
+  //           message: err,
+  //         },
+  //       ],
+  //     };
+  //   }
+  // }
 }

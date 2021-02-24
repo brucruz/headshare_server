@@ -31,6 +31,8 @@ import Post from '../PostType';
 import PostResponse from './PostResponse';
 import PostsResponse from './PostsResponse';
 import PostOptionsInput from '../inputs/PostOptionsInput';
+import UploadImageInput from '../../medias/resolvers/input/UploadImageInput';
+import S3StorageProvider from '../../shared/providers/StorageProvider/implementations/S3StorageProvider';
 
 @Resolver(_of => Post)
 export default class PostResolver {
@@ -503,6 +505,138 @@ export default class PostResolver {
     return {
       post,
     };
+  }
+
+  @Mutation(() => PostResponse, {
+    description: 'Users can upload a image directly as a post main media',
+  })
+  async updatePostMainImage(
+    @Arg('communitySlug', () => String) communitySlug: string,
+    @Arg('postId', () => String) postId: string,
+    @Arg('imageData', () => UploadImageInput)
+    { format, thumbnailUrl, name, description, file }: UploadImageInput,
+    @Ctx() { req }: ApolloContext,
+  ): Promise<PostResponse> {
+    const communityData = await CommunityModel.findOne({ slug: communitySlug });
+    const community = communityData?._id;
+
+    if (!community) {
+      return {
+        errors: [
+          {
+            field: 'community',
+            message:
+              'You must be connected to a community to perform this action',
+          },
+        ],
+      };
+    }
+
+    const creator = req.session.userId;
+
+    if (!creator) {
+      return {
+        errors: [
+          {
+            field: 'auth',
+            message: 'You must be logged in to perform this action',
+          },
+        ],
+      };
+    }
+
+    const isCreator = await RoleModel.isCreator(creator, community);
+
+    if (!isCreator) {
+      return {
+        errors: [
+          {
+            field: 'role',
+            message: 'Only community creators may perform this action',
+          },
+        ],
+      };
+    }
+
+    if (format !== 'image') {
+      return {
+        errors: [
+          {
+            field: 'format',
+            message: 'Invalid media format',
+          },
+        ],
+      };
+    }
+
+    const storageProvider = new S3StorageProvider();
+
+    if (!file.name) {
+      return {
+        errors: [
+          {
+            field: 'fileName',
+            message: 'Filename is missing',
+          },
+        ],
+      };
+    }
+
+    if (!file.type) {
+      return {
+        errors: [
+          {
+            field: 'fileType',
+            message: 'Filetype is missing',
+          },
+        ],
+      };
+    }
+
+    try {
+      const result = await storageProvider.createSignedRequest(
+        file.name,
+        file.type,
+      );
+
+      const media = new MediaModel({
+        format,
+        url: result.url,
+        thumbnailUrl,
+        name,
+        description,
+        file,
+        uploadLink: result.signedRequest,
+        community,
+      });
+
+      await media.save();
+
+      const post = await PostModel.findByIdAndUpdate(
+        postId,
+        {
+          $set: {
+            ...{ mainMedia: media._id },
+          },
+        },
+        {
+          new: true,
+        },
+      );
+
+      return {
+        post: post || undefined,
+      };
+    } catch (err) {
+      return {
+        errors: [
+          {
+            field: 'none',
+            message: err,
+          },
+        ],
+      };
+    }
   }
 
   @FieldResolver()

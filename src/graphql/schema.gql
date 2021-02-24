@@ -279,6 +279,9 @@ type Mutation {
   register(data: RegisterUserInput!): LoggedUserResponse!
   updateCommunity(id: String!, updateData: UpdateCommunityInput!): CommunityResponse!
   updatePost(communitySlug: String!, id: String!, updateData: UpdatePostInput!): PostResponse
+
+  """Users can upload a image directly as a post main media"""
+  updatePostMainImage(communitySlug: String!, imageData: UploadImageInput!, postId: String!): PostResponse!
   updatePostMainMedia(communityId: String!, mainMediaData: UpdateMediaInput!, postId: String!): PostResponse!
   updateRole(id: String!, updateData: UpdateRoleInput!): RoleResponse
   updateTag(communitySlug: String!, id: String!, updateData: UpdateTagInput!): TagResponse
