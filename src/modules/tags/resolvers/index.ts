@@ -271,7 +271,7 @@ export default class TagResolver {
       };
     }
 
-    const isCreator = await RoleModel.isCreator(userId, id);
+    const isCreator = await RoleModel.isCreator(userId, community);
 
     if (!isCreator) {
       return {
@@ -293,7 +293,9 @@ export default class TagResolver {
         canonicalComponents,
       });
 
-      if (checkCanonicalDuplicate) {
+      const oldSlugEqualNew = checkCanonicalDuplicate?.slug === slug;
+
+      if (checkCanonicalDuplicate && !oldSlugEqualNew) {
         return {
           errors: [
             {
