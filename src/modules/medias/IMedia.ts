@@ -39,6 +39,8 @@ export default interface IMedia extends Document {
   name?: string;
   description?: string;
   file: IFile;
+  width?: number;
+  height?: number;
   uploadLink: string;
   community: Community;
   isActive: boolean;

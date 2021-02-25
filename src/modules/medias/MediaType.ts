@@ -35,6 +35,12 @@ export default class Media {
   @Field(() => File, { description: 'Media file information' })
   file: File;
 
+  @Field(() => Number, { description: 'Media original width', nullable: true })
+  width?: string;
+
+  @Field(() => Number, { description: 'Media original height', nullable: true })
+  height?: string;
+
   @Field(() => String, {
     description: 'Link through which the media file should be uploaded to',
   })

@@ -29,6 +29,12 @@ const Schema = new mongoose.Schema(
       extension: { type: String },
       type: { type: String },
     },
+    width: {
+      type: Number,
+    },
+    height: {
+      type: Number,
+    },
     uploadLink: String,
     community: {
       type: ObjectId,

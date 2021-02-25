@@ -514,7 +514,15 @@ export default class PostResolver {
     @Arg('communitySlug', () => String) communitySlug: string,
     @Arg('postId', () => String) postId: string,
     @Arg('imageData', () => UploadImageInput)
-    { format, thumbnailUrl, name, description, file }: UploadImageInput,
+    {
+      format,
+      thumbnailUrl,
+      name,
+      description,
+      file,
+      width,
+      height,
+    }: UploadImageInput,
     @Ctx() { req }: ApolloContext,
   ): Promise<PostResponse> {
     const communityData = await CommunityModel.findOne({ slug: communitySlug });
@@ -606,6 +614,8 @@ export default class PostResolver {
         name,
         description,
         file,
+        width,
+        height,
         uploadLink: result.signedRequest,
         community,
       });

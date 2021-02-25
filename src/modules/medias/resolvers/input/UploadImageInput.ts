@@ -24,4 +24,10 @@ export default class UploadImageInput {
 
   @Field(() => FileInput, { description: 'Media file information' })
   file: FileInput;
+
+  @Field(() => Number, { description: 'Media original width', nullable: true })
+  width?: number;
+
+  @Field(() => Number, { description: 'Media original height', nullable: true })
+  height?: number;
 }

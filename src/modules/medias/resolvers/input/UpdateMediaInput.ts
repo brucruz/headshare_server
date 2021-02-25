@@ -30,4 +30,16 @@ export default class UpdateMediaInput {
     nullable: true,
   })
   file?: FileInput;
+
+  @Field(() => Number, {
+    description: 'Media original width (for images)',
+    nullable: true,
+  })
+  width?: number;
+
+  @Field(() => Number, {
+    description: 'Media original height (for images)',
+    nullable: true,
+  })
+  height?: number;
 }

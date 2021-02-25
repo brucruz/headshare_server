@@ -227,6 +227,9 @@ type Media {
 
   """Media format"""
   format: MediaFormat!
+
+  """Media original height"""
+  height: Float
   isActive: Boolean!
 
   """Media internal name"""
@@ -244,6 +247,9 @@ type Media {
 
   """Media host url"""
   url: String!
+
+  """Media original width"""
+  width: Float
 }
 
 """The possible formats a media might have"""
@@ -559,6 +565,9 @@ input UpdateMediaInput {
   """Media format"""
   format: MediaFormat
 
+  """Media original height (for images)"""
+  height: Float
+
   """Media internal name"""
   name: String
 
@@ -567,6 +576,9 @@ input UpdateMediaInput {
 
   """Media url"""
   url: String
+
+  """Media original width (for images)"""
+  width: Float
 }
 
 input UpdatePostInput {
@@ -624,11 +636,17 @@ input UploadImageInput {
   """Media format"""
   format: MediaFormat!
 
+  """Media original height"""
+  height: Float
+
   """Media internal name"""
   name: String
 
   """Media thumbnail picture url"""
   thumbnailUrl: String
+
+  """Media original width"""
+  width: Float
 }
 
 input UploadMediaInput {
