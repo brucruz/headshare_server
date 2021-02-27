@@ -508,6 +508,88 @@ export default class PostResolver {
   }
 
   @Mutation(() => PostResponse, {
+    description: 'Users can remove main media from a post',
+  })
+  async deletePostMainMedia(
+    @Arg('communitySlug', () => String) communitySlug: string,
+    @Arg('postId', () => String) postId: string,
+    @Ctx() { req }: ApolloContext,
+  ): Promise<PostResponse> {
+    const communityData = await CommunityModel.findOne({ slug: communitySlug });
+    const community = communityData?._id;
+
+    if (!community) {
+      return {
+        errors: [
+          {
+            field: 'community',
+            message:
+              'You must be connected to a community to perform this action',
+          },
+        ],
+      };
+    }
+
+    const creator = req.session.userId;
+
+    if (!creator) {
+      return {
+        errors: [
+          {
+            field: 'auth',
+            message: 'You must be logged in to perform this action',
+          },
+        ],
+      };
+    }
+
+    const isCreator = await RoleModel.isCreator(creator, community);
+
+    if (!isCreator) {
+      return {
+        errors: [
+          {
+            field: 'role',
+            message: 'Only community creators may perform this action',
+          },
+        ],
+      };
+    }
+
+    try {
+      const post = await PostModel.findById(postId);
+
+      if (!post) {
+        return {
+          errors: [
+            {
+              field: 'postId',
+              message: 'No post found with this Id',
+            },
+          ],
+        };
+      }
+
+      post.mainMedia = undefined;
+
+      await post.save();
+
+      return {
+        post: post || undefined,
+      };
+    } catch (err) {
+      return {
+        errors: [
+          {
+            field: 'none',
+            message: err,
+          },
+        ],
+      };
+    }
+  }
+
+  @Mutation(() => PostResponse, {
     description: 'Users can upload a image directly as a post main media',
   })
   async updatePostMainImage(

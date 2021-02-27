@@ -280,6 +280,9 @@ type Mutation {
   createPost(communitySlug: String!, data: CreatePostInput!): PostResponse!
   createRole(data: CreateRoleInput!): RoleResponse!
   createTag(communitySlug: String!, data: CreateTagInput!): TagResponse!
+
+  """Users can remove main media from a post"""
+  deletePostMainMedia(communitySlug: String!, postId: String!): PostResponse!
   login(loginData: LoginUserInput!): LoggedUserResponse!
   logout: Boolean!
   register(data: RegisterUserInput!): LoggedUserResponse!
