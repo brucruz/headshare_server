@@ -281,8 +281,14 @@ type Mutation {
   createRole(data: CreateRoleInput!): RoleResponse!
   createTag(communitySlug: String!, data: CreateTagInput!): TagResponse!
 
+  """Owners may """
+  deletePost(communitySlug: String!, postId: String!): SuccessResponse!
+
   """Users can remove main media from a post"""
   deletePostMainMedia(communitySlug: String!, postId: String!): PostResponse!
+
+  """Owners may """
+  deleteTag(communitySlug: String!, tagId: String!): SuccessResponse!
   login(loginData: LoginUserInput!): LoggedUserResponse!
   logout: Boolean!
   register(data: RegisterUserInput!): LoggedUserResponse!
@@ -494,6 +500,11 @@ type RoleResponse {
 type RolesResponse {
   errors: [ErrorResponse!]
   roles: [Role!]
+}
+
+type SuccessResponse {
+  errors: [ErrorResponse!]
+  success: Boolean!
 }
 
 """The Tags model"""

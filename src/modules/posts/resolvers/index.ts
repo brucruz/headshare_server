@@ -30,6 +30,7 @@ import PostModel from '../PostModel';
 import Post from '../PostType';
 import PostResponse from './PostResponse';
 import PostsResponse from './PostsResponse';
+import SuccessResponse from '../../shared/SuccessResponse';
 import PostOptionsInput from '../inputs/PostOptionsInput';
 import UploadImageInput from '../../medias/resolvers/input/UploadImageInput';
 import S3StorageProvider from '../../shared/providers/StorageProvider/implementations/S3StorageProvider';
@@ -587,6 +588,75 @@ export default class PostResolver {
         ],
       };
     }
+  }
+
+  @Mutation(() => SuccessResponse, { description: 'Owners may ' })
+  async deletePost(
+    @Arg('communitySlug', () => String) communitySlug: string,
+    @Arg('postId', () => String) postId: string,
+    @Ctx() { req }: ApolloContext,
+  ): Promise<SuccessResponse> {
+    const communityData = await CommunityModel.findOne({ slug: communitySlug });
+    const community = communityData?._id;
+
+    if (!community) {
+      return {
+        errors: [
+          {
+            field: 'community',
+            message:
+              'You must be connected to a community to perform this action',
+          },
+        ],
+        success: false,
+      };
+    }
+
+    const creator = req.session.userId;
+
+    if (!creator) {
+      return {
+        errors: [
+          {
+            field: 'auth',
+            message: 'You must be logged in to perform this action',
+          },
+        ],
+        success: false,
+      };
+    }
+
+    const isCreator = await RoleModel.isCreator(creator, community);
+
+    if (!isCreator) {
+      return {
+        errors: [
+          {
+            field: 'role',
+            message: 'Only community creators may perform this action',
+          },
+        ],
+        success: false,
+      };
+    }
+
+    const post = await PostModel.findByIdAndDelete(postId);
+
+    if (!post) {
+      return {
+        errors: [
+          {
+            field: 'postId',
+            message: 'Post not found with the informed id',
+          },
+        ],
+        success: false,
+      };
+    }
+
+    return {
+      success: true,
+    };
   }
 
   @Mutation(() => PostResponse, {

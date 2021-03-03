@@ -26,6 +26,7 @@ import TagResponse from './TagResponse';
 import TagsResponse from './TagsResponse';
 import transformSlug from '../../../utils/transformSlug';
 import PostOptionsInput from '../../posts/inputs/PostOptionsInput';
+import SuccessResponse from '../../shared/SuccessResponse';
 
 @Resolver(_of => Tag)
 export default class TagResolver {
@@ -340,6 +341,75 @@ export default class TagResolver {
     await tag.save();
 
     return { tag };
+  }
+
+  @Mutation(() => SuccessResponse, { description: 'Owners may ' })
+  async deleteTag(
+    @Arg('communitySlug', () => String) communitySlug: string,
+    @Arg('tagId', () => String) tagId: string,
+    @Ctx() { req }: ApolloContext,
+  ): Promise<SuccessResponse> {
+    const communityData = await CommunityModel.findOne({ slug: communitySlug });
+    const community = communityData?._id;
+
+    if (!community) {
+      return {
+        errors: [
+          {
+            field: 'community',
+            message:
+              'You must be connected to a community to perform this action',
+          },
+        ],
+        success: false,
+      };
+    }
+
+    const creator = req.session.userId;
+
+    if (!creator) {
+      return {
+        errors: [
+          {
+            field: 'auth',
+            message: 'You must be logged in to perform this action',
+          },
+        ],
+        success: false,
+      };
+    }
+
+    const isCreator = await RoleModel.isCreator(creator, community);
+
+    if (!isCreator) {
+      return {
+        errors: [
+          {
+            field: 'role',
+            message: 'Only community creators may perform this action',
+          },
+        ],
+        success: false,
+      };
+    }
+
+    const tag = await TagModel.findByIdAndDelete(tagId);
+
+    if (!tag) {
+      return {
+        errors: [
+          {
+            field: 'tagId',
+            message: 'Tag not found with the informed id',
+          },
+        ],
+        success: false,
+      };
+    }
+
+    return {
+      success: true,
+    };
   }
 
   @FieldResolver(() => [Post])
