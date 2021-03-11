@@ -26,6 +26,7 @@ import UserModel from '../../users/UserModel';
 import User from '../../users/UserType';
 import CommunityModel from '../CommunityModel';
 import Community from '../CommunityType';
+import HighlightedTag from '../HighlightTagType';
 import { IHighlightedTag } from '../ICommunity';
 import CommunitiesResponse from './CommunitiesResponse';
 import CommunityResponse from './CommunityResponse';
@@ -301,7 +302,7 @@ export default class CommunityResolver {
       .limit(realLimit))!;
   }
 
-  @FieldResolver(() => [Tag])
+  @FieldResolver(() => [HighlightedTag])
   async highlightedTags(
     @Root() community: Community,
   ): Promise<IHighlightedTag[]> {
@@ -320,7 +321,7 @@ export default class CommunityResolver {
 
         return [
           {
-            tag: tag._id,
+            tag,
             order: item.order,
           },
         ];
@@ -331,7 +332,11 @@ export default class CommunityResolver {
       highlightedTagsObject,
     );
 
-    return highlightedTagsObjectResolved.flat();
+    const orderedHighlightedTags = highlightedTagsObjectResolved
+      .flat()
+      .sort((a: any, b: any) => a.order - b.order);
+
+    return orderedHighlightedTags;
   }
 
   @FieldResolver()
