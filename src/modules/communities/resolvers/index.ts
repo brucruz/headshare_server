@@ -1,4 +1,4 @@
-import { ObjectID, ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import {
   Resolver,
   Query,
@@ -26,11 +26,11 @@ import UserModel from '../../users/UserModel';
 import User from '../../users/UserType';
 import CommunityModel from '../CommunityModel';
 import Community from '../CommunityType';
-import HighlightedTag from '../HighlightTagType';
 import { IHighlightedTag } from '../ICommunity';
 import CommunitiesResponse from './CommunitiesResponse';
 import CommunityResponse from './CommunityResponse';
 import CreateCommunityInput from './input/CreateCommunityInput';
+import HighlightedTagInput from './input/HighlightedTagInput';
 import UpdateCommunityInput from './input/UpdateCommunityInput';
 
 @Resolver(_of => Community)
@@ -184,41 +184,33 @@ export default class CommunityResolver {
       }
     }
 
-    // let highlightedTagsObject;
-    // let highlightedTagsObjectIds;
-
     let highlightedTagsObject;
     let highlightedTagsObjectResolved;
-    let highlightedTagsObjectFiltered;
-
-    // console.log('highlightedTags: ', highlightedTags);
+    let highlightedTagsObjectFinal;
 
     if (highlightedTags) {
-      highlightedTagsObject = highlightedTags.map(async item => ({
-        order: item.order,
-        tag: await TagModel.findById(new ObjectID(item.tag)),
-      }));
-      // console.log('highlightedTagsObject: ', highlightedTagsObject);
+      highlightedTagsObject = highlightedTags.flatMap(
+        async function flatMapHighlightedTags(item: HighlightedTagInput) {
+          const tag = await TagModel.findById(item.tag);
+
+          if (!tag) {
+            return [];
+          }
+
+          return [
+            {
+              tag: tag._id,
+              order: item.order,
+            },
+          ];
+        },
+      );
 
       highlightedTagsObjectResolved = await Promise.all(highlightedTagsObject);
-      // console.log(
-      //   'highlightedTagsObjectResolved: ',
-      //   highlightedTagsObjectResolved,
-      // );
 
-      highlightedTagsObjectFiltered = highlightedTagsObjectResolved.filter(
-        item => item.tag !== null,
-      );
-      // console.log(
-      //   'highlightedTagsObjectFiltered: ',
-      //   highlightedTagsObjectFiltered,
-      // );
+      highlightedTagsObjectFinal = highlightedTagsObjectResolved.flat();
 
-      // highlightedTagsObject = await TagModel.find({
-      //   _id: { $in: highlightedTags },
-      // });
-
-      if (!highlightedTagsObjectFiltered) {
+      if (!highlightedTagsObjectFinal) {
         return {
           errors: [
             {
@@ -239,7 +231,7 @@ export default class CommunityResolver {
         ...(avatar && avatarObject ? { avatar: avatarObject?._id } : {}),
         ...(banner && bannerObject ? { banner: bannerObject?._id } : {}),
         ...(highlightedTags && highlightedTagsObject
-          ? { highlightedTags: highlightedTagsObjectFiltered }
+          ? { highlightedTags: highlightedTagsObjectFinal }
           : {}),
       },
     };
@@ -310,35 +302,36 @@ export default class CommunityResolver {
   }
 
   @FieldResolver(() => [Tag])
-  async highlightedTags(@Root() community: Community): Promise<unknown[]> {
-    const highlightedTagPromiseArray = community._doc.highlightedTags.map(
-      async item => {
+  async highlightedTags(
+    @Root() community: Community,
+  ): Promise<IHighlightedTag[]> {
+    const highlightedTagsObject: Promise<
+      {
+        tag: any;
+        order: number;
+      }[]
+    >[] = community._doc.highlightedTags.flatMap(
+      async function flatMapHighlightedTags(item: HighlightedTagInput) {
         const tag = await TagModel.findById(item.tag);
 
-        if (tag) {
-          return {
-            order: item.order,
-            tag,
-          };
+        if (!tag) {
+          return [];
         }
+
+        return [
+          {
+            tag: tag._id,
+            order: item.order,
+          },
+        ];
       },
     );
 
-    const highlightedTagWithNulls = await Promise.all(
-      highlightedTagPromiseArray,
+    const highlightedTagsObjectResolved = await Promise.all(
+      highlightedTagsObject,
     );
 
-    const highlightedTagWithDisordered = highlightedTagWithNulls.filter(
-      item => {
-        return item !== null;
-      },
-    );
-
-    const final = highlightedTagWithDisordered.sort(
-      (a, b) => a.order - b.order,
-    );
-
-    return final;
+    return highlightedTagsObjectResolved.flat();
   }
 
   @FieldResolver()
