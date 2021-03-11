@@ -49,8 +49,13 @@ const Schema = new mongoose.Schema(
     ],
     highlightedTags: [
       {
-        type: ObjectId,
-        ref: 'tags',
+        tag: {
+          type: ObjectId,
+          ref: 'tags',
+        },
+        order: {
+          type: Number,
+        },
       },
     ],
     roles: [

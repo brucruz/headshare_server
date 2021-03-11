@@ -7,6 +7,7 @@ import Post from '../posts/PostType';
 import Role from '../roles/RoleType';
 import Tag from '../tags/TagType';
 import User from '../users/UserType';
+import HighlightedTag from './HighlightTagType';
 
 @ObjectType({ description: 'The Communities model' })
 export default class Community {
@@ -45,11 +46,11 @@ export default class Community {
   })
   tags: Tag[];
 
-  @Field(() => [Tag], {
+  @Field(() => [HighlightedTag], {
     description:
       'Owner selected tags to appear on community home, given a specific order',
   })
-  highlightedTags: Tag[];
+  highlightedTags: HighlightedTag[];
 
   @Field(() => [Role])
   roles: Role[];

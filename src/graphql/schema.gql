@@ -33,7 +33,7 @@ type Community {
   """
   Owner selected tags to appear on community home, given a specific order
   """
-  highlightedTags: [Tag!]!
+  highlightedTags: [HighlightedTag!]!
   isActive: Boolean!
 
   """Community title"""
@@ -203,6 +203,23 @@ input FindByUserInput {
 
   """User slug"""
   userInput: String!
+}
+
+"""Community highlighted tag model"""
+type HighlightedTag {
+  """The order of the community highlighted tag"""
+  order: Int!
+
+  """The community highlighted tag"""
+  tag: Tag!
+}
+
+input HighlightedTagInput {
+  """The order of the community highlighted tag"""
+  order: Int!
+
+  """The community highlighted tag"""
+  tag: String!
 }
 
 type LoggedUserResponse {
@@ -569,7 +586,7 @@ input UpdateCommunityInput {
   """
   Owner selected tags to appear on community home, given a specific order
   """
-  highlightedTags: [String!]
+  highlightedTags: [HighlightedTagInput!]
 
   """Community title"""
   logo: String

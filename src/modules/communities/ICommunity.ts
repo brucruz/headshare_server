@@ -5,6 +5,10 @@ import Role from '../roles/RoleType';
 import Tag from '../tags/TagType';
 import User from '../users/UserType';
 
+export interface IHighlightedTag {
+  tag: Tag;
+  order: number;
+}
 export default interface ICommunity extends Document {
   logo?: string;
   title: string;
@@ -14,7 +18,7 @@ export default interface ICommunity extends Document {
   banner?: Media;
   posts: Post[];
   tags: Tag[];
-  highlightedTags: Tag[];
+  highlightedTags: IHighlightedTag[];
   roles: Role[];
   creator: User;
   followersCount: number;
