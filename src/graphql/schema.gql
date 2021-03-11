@@ -29,6 +29,11 @@ type Community {
 
   """The number of users following this community"""
   followersCount: Int!
+
+  """
+  Owner selected tags to appear on community home, given a specific order
+  """
+  highlightedTags: [Tag!]!
   isActive: Boolean!
 
   """Community title"""
@@ -42,6 +47,8 @@ type Community {
 
   """Community slug to use on url"""
   slug: String!
+
+  """All the tags associated with this community"""
   tags(cursor: String, limit: Int!): [Tag!]!
 
   """Community title"""
@@ -558,6 +565,11 @@ input UpdateCommunityInput {
 
   """Community description"""
   description: String
+
+  """
+  Owner selected tags to appear on community home, given a specific order
+  """
+  highlightedTags: [String!]
 
   """Community title"""
   logo: String

@@ -1,4 +1,5 @@
 import { Field, InputType } from 'type-graphql';
+import Tag from '../../../tags/TagType';
 
 @InputType()
 export default class UpdateCommunityInput {
@@ -28,4 +29,11 @@ export default class UpdateCommunityInput {
     nullable: true,
   })
   banner?: string;
+
+  @Field(() => [String], {
+    description:
+      'Owner selected tags to appear on community home, given a specific order',
+    nullable: true,
+  })
+  highlightedTags?: Tag[];
 }

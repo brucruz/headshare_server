@@ -111,7 +111,15 @@ export default class CommunityResolver {
   async updateCommunity(
     @Arg('id', () => String) id: string,
     @Arg('updateData', () => UpdateCommunityInput)
-    { title, slug, description, logo, avatar, banner }: UpdateCommunityInput,
+    {
+      title,
+      slug,
+      description,
+      logo,
+      avatar,
+      banner,
+      highlightedTags,
+    }: UpdateCommunityInput,
     @Ctx() { req }: ApolloContext,
   ): Promise<CommunityResponse> {
     const { userId } = req.session;
@@ -174,6 +182,28 @@ export default class CommunityResolver {
       }
     }
 
+    let highlightedTagsObject;
+    let highlightedTagsObjectIds;
+
+    if (highlightedTags) {
+      highlightedTagsObject = await TagModel.find({
+        _id: { $in: highlightedTags },
+      });
+
+      if (!highlightedTagsObject) {
+        return {
+          errors: [
+            {
+              field: 'highlightedTags',
+              message: 'Tags Ids are incorrect',
+            },
+          ],
+        };
+      }
+
+      highlightedTagsObjectIds = highlightedTagsObject.map(i => i._id);
+    }
+
     const newData = {
       $set: {
         ...(title ? { title } : {}),
@@ -182,6 +212,9 @@ export default class CommunityResolver {
         ...(logo ? { logo } : {}),
         ...(avatar && avatarObject ? { avatar: avatarObject?._id } : {}),
         ...(banner && bannerObject ? { banner: bannerObject?._id } : {}),
+        ...(highlightedTags && highlightedTagsObject
+          ? { highlightedTags: highlightedTagsObjectIds }
+          : {}),
       },
     };
 
@@ -248,6 +281,14 @@ export default class CommunityResolver {
     })
       .sort({ createdAt: 'asc' })
       .limit(realLimit))!;
+  }
+
+  @FieldResolver(() => [Tag])
+  async highlightedTags(@Root() community: Community): Promise<ITag[]> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return (await TagModel.find({
+      _id: { $in: community._doc.highlightedTags },
+    }))!;
   }
 
   @FieldResolver()

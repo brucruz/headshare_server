@@ -40,8 +40,16 @@ export default class Community {
   @Field(() => [Post])
   posts: Post[];
 
-  @Field(() => [Tag])
+  @Field(() => [Tag], {
+    description: 'All the tags associated with this community',
+  })
   tags: Tag[];
+
+  @Field(() => [Tag], {
+    description:
+      'Owner selected tags to appear on community home, given a specific order',
+  })
+  highlightedTags: Tag[];
 
   @Field(() => [Role])
   roles: Role[];

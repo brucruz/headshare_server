@@ -14,6 +14,7 @@ export default interface ICommunity extends Document {
   banner?: Media;
   posts: Post[];
   tags: Tag[];
+  highlightedTags: Tag[];
   roles: Role[];
   creator: User;
   followersCount: number;

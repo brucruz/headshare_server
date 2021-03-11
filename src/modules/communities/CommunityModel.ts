@@ -47,6 +47,12 @@ const Schema = new mongoose.Schema(
         ref: 'tags',
       },
     ],
+    highlightedTags: [
+      {
+        type: ObjectId,
+        ref: 'tags',
+      },
+    ],
     roles: [
       {
         type: ObjectId,
