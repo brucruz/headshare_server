@@ -72,7 +72,7 @@ export default class CommunityResolver {
   })
   async createCommunity(
     @Arg('communityData', () => CreateCommunityInput)
-    { logo, title, slug, description }: CreateCommunityInput,
+    { logo, title, slug, tagline, description }: CreateCommunityInput,
     @Ctx() { req }: ApolloContext,
   ): Promise<CommunityResponse> {
     const creator = req.session.userId;
@@ -92,6 +92,7 @@ export default class CommunityResolver {
       logo,
       title,
       slug,
+      tagline,
       description,
     });
 
@@ -117,6 +118,7 @@ export default class CommunityResolver {
     {
       title,
       slug,
+      tagline,
       description,
       logo,
       avatar,
@@ -227,6 +229,7 @@ export default class CommunityResolver {
       $set: {
         ...(title ? { title } : {}),
         ...(slug ? { slug } : {}),
+        ...(tagline ? { tagline } : {}),
         ...(description ? { description } : {}),
         ...(logo ? { logo } : {}),
         ...(avatar && avatarObject ? { avatar: avatarObject?._id } : {}),

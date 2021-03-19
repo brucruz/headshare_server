@@ -23,6 +23,9 @@ export default class Community {
   @Field(() => String, { description: 'Community slug to use on url' })
   slug: string;
 
+  @Field(() => String, { description: 'Community tagline', nullable: true })
+  tagline?: string;
+
   @Field(() => String, { description: 'Community description', nullable: true })
   description?: string;
 

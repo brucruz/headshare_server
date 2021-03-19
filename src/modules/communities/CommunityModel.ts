@@ -24,6 +24,9 @@ const Schema = new mongoose.Schema(
       unique: true,
       index: true,
     },
+    tagline: {
+      type: String,
+    },
     description: {
       type: String,
     },

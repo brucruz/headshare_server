@@ -13,6 +13,7 @@ export default interface ICommunity extends Document {
   logo?: string;
   title: string;
   slug: string;
+  tagline?: string;
   description?: string;
   avatar?: Media;
   banner?: Media;
