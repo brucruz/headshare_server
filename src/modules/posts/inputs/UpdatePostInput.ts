@@ -1,6 +1,4 @@
 import { Field, InputType } from 'type-graphql';
-import ObjectIdScalar from '../../../type-graphql/ObjectIdScalar';
-import Tag from '../../tags/TagType';
 import { PostStatus } from '../IPost';
 
 @InputType()

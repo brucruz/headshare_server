@@ -452,12 +452,20 @@ export default class TagResolver {
     @Arg('limit', () => Int) limit: number,
     @Arg('cursor', () => String, { nullable: true }) cursor: Date | null,
     @Arg('postOptions', () => PostOptionsInput, { nullable: true })
-    options: PostOptionsInput,
+    options?: PostOptionsInput,
   ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
     const realLimitPlusOne = realLimit + 1;
 
-    const filters = options && getPostOptions(options);
+    let filters: PostOptionsInput = {};
+
+    const allFilters = options && getPostOptions(options);
+
+    if (allFilters) {
+      const { tags, ...newFilters } = allFilters;
+
+      filters = newFilters;
+    }
 
     const cursorFilter = {
       ...(cursor
@@ -494,11 +502,17 @@ export default class TagResolver {
   async postCount(
     @Root() tag: Tag,
     @Arg('postOptions', () => PostOptionsInput, { nullable: true })
-    options: PostOptionsInput,
+    options?: PostOptionsInput,
   ): Promise<number> {
-    // const { tagIds, ...postOptions } = options;
+    let filters: PostOptionsInput = {};
 
-    const filters = options && getPostOptions(options);
+    const allFilters = options && getPostOptions(options);
+
+    if (allFilters) {
+      const { tags, ...newFilters } = allFilters;
+
+      filters = newFilters;
+    }
 
     return PostModel.countDocuments(
       { tags: tag._doc._id, ...filters },
