@@ -38,11 +38,11 @@ export default class UpdatePostInput {
   })
   exclusive?: boolean;
 
-  @Field(() => [ObjectIdScalar], {
+  @Field(() => [String], {
     description: 'Post content',
     nullable: true,
   })
-  tags?: Tag[];
+  tags?: any[];
 
   @Field(() => PostStatus, {
     description: 'created post status',

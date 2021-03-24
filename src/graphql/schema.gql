@@ -677,7 +677,7 @@ input UpdatePostInput {
   status: PostStatus
 
   """Post content"""
-  tags: [ObjectId!]
+  tags: [String!]
 
   """Post title"""
   title: String
