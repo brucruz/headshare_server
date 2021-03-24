@@ -1,13 +1,12 @@
 import { Field, ObjectType } from 'type-graphql';
-import ITag from '../ITag';
-import Tag from '../TagType';
 import FieldError from '../../shared/ErrorResponse';
+import PaginatedTags from './PaginatedTags';
 
 @ObjectType()
 export default class TagsResponse {
   @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
 
-  @Field(() => [Tag], { nullable: true })
-  tags?: ITag[];
+  @Field(() => PaginatedTags, { nullable: true })
+  paginatedTags?: PaginatedTags;
 }

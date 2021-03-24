@@ -2,7 +2,7 @@ import { Document } from 'mongoose';
 import { registerEnumType } from 'type-graphql';
 import Community from '../communities/CommunityType';
 import Media from '../medias/MediaType';
-import Tag from '../tags/TagType';
+import PaginatedTags from '../tags/resolvers/PaginatedTags';
 import User from '../users/UserType';
 
 // eslint-disable-next-line no-shadow
@@ -41,7 +41,7 @@ export default interface IPost extends Document {
   likes: number;
   creator: User;
   community: Community;
-  tags: Tag[];
+  tags: PaginatedTags;
   isActive: boolean;
   removedAt: Date | null;
   createdAt: Date;

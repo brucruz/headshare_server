@@ -41,8 +41,7 @@ type Community {
 
   """The number of subscribed users in this community"""
   membersCount: Int!
-  paginatedPosts(cursor: String, limit: Int!): PaginatedPosts!
-  posts: [Post!]!
+  posts(cursor: String, limit: Int!): PaginatedPosts!
   removedAt: DateTime
   roles: [Role!]!
 
@@ -348,6 +347,11 @@ type PaginatedPosts {
   posts: [Post!]!
 }
 
+type PaginatedTags {
+  hasMore: Boolean!
+  tags: [Tag!]!
+}
+
 """The Posts model"""
 type Post {
   _id: ObjectId!
@@ -387,7 +391,7 @@ type Post {
 
   """created post status"""
   status: PostStatus
-  tags: [Tag!]!
+  tags(cursor: String, limit: Int!, tagOptions: TagOptionsInput): PaginatedTags!
 
   """Post title"""
   title: String
@@ -475,7 +479,7 @@ type Query {
   tag(id: String!): TagResponse!
 
   """Queries all tags in database"""
-  tags: TagsResponse!
+  tags(cursor: String, limit: Int!, tagOptions: TagOptionsInput): TagsResponse!
 
   """Queries all users in database"""
   users: UsersResponse!
@@ -568,7 +572,7 @@ type Tag {
 
   """The number of posts with this tag"""
   postCount(postOptions: PostOptionsInput): Int!
-  posts(cursor: String, limit: Int!, postOptions: PostOptionsInput): [Post!]!
+  posts(cursor: String, limit: Int!, postOptions: PostOptionsInput): PaginatedPosts!
   removedAt: DateTime
 
   """Tag slug to use on url"""
@@ -581,6 +585,11 @@ type Tag {
   updatedAt: DateTime
 }
 
+input TagOptionsInput {
+  """Specifies the community id"""
+  communityId: String
+}
+
 type TagResponse {
   errors: [ErrorResponse!]
   tag: Tag
@@ -588,7 +597,7 @@ type TagResponse {
 
 type TagsResponse {
   errors: [ErrorResponse!]
-  tags: [Tag!]
+  paginatedTags: PaginatedTags
 }
 
 input UpdateCommunityInput {

@@ -3,7 +3,7 @@ import { Field, Int, ObjectType } from 'type-graphql';
 import DateTimeScalar from '../../type-graphql/DateTimeScalar';
 import ObjectIdScalar from '../../type-graphql/ObjectIdScalar';
 import Media from '../medias/MediaType';
-import Post from '../posts/PostType';
+import PaginatedPosts from '../posts/resolvers/PaginatedPosts';
 import Role from '../roles/RoleType';
 import Tag from '../tags/TagType';
 import User from '../users/UserType';
@@ -41,8 +41,8 @@ export default class Community {
   })
   banner?: Media;
 
-  @Field(() => [Post])
-  posts: Post[];
+  @Field(() => PaginatedPosts)
+  posts: PaginatedPosts;
 
   @Field(() => [Tag], {
     description: 'All the tags associated with this community',

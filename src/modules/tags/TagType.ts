@@ -3,7 +3,7 @@ import { Field, Int, ObjectType } from 'type-graphql';
 import DateTimeScalar from '../../type-graphql/DateTimeScalar';
 import ObjectIdScalar from '../../type-graphql/ObjectIdScalar';
 import Community from '../communities/CommunityType';
-import Post from '../posts/PostType';
+import PaginatedPosts from '../posts/resolvers/PaginatedPosts';
 
 @ObjectType({ description: 'The Tags model' })
 export default class Tag {
@@ -28,8 +28,8 @@ export default class Tag {
   @Field(_type => Community)
   community: ObjectId;
 
-  @Field(() => [Post])
-  posts: Post[];
+  @Field(() => PaginatedPosts)
+  posts: PaginatedPosts;
 
   @Field(() => Int, {
     description: 'The number of posts with this tag',

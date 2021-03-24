@@ -1,13 +1,13 @@
 import { Document } from 'mongoose';
 import Community from '../communities/CommunityType';
-import Post from '../posts/PostType';
+import PaginatedPosts from '../posts/resolvers/PaginatedPosts';
 
 export default interface ITag extends Document {
   title: string;
   slug: string;
   description?: string;
   community: Community;
-  posts: Post[];
+  posts: PaginatedPosts;
   postCount: number;
   isActive: boolean;
   removedAt: Date | null;

@@ -1,6 +1,6 @@
 import { Document } from 'mongoose';
 import Media from '../medias/MediaType';
-import Post from '../posts/PostType';
+import PaginatedPosts from '../posts/resolvers/PaginatedPosts';
 import Role from '../roles/RoleType';
 import Tag from '../tags/TagType';
 import User from '../users/UserType';
@@ -17,7 +17,7 @@ export default interface ICommunity extends Document {
   description?: string;
   avatar?: Media;
   banner?: Media;
-  posts: Post[];
+  posts: PaginatedPosts;
   tags: Tag[];
   highlightedTags: IHighlightedTag[];
   roles: Role[];

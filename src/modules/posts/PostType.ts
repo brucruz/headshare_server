@@ -4,7 +4,7 @@ import DateTimeScalar from '../../type-graphql/DateTimeScalar';
 import ObjectIdScalar from '../../type-graphql/ObjectIdScalar';
 import Community from '../communities/CommunityType';
 import Media from '../medias/MediaType';
-import Tag from '../tags/TagType';
+import PaginatedTags from '../tags/resolvers/PaginatedTags';
 import User from '../users/UserType';
 import { PostStatus } from './IPost';
 
@@ -71,8 +71,8 @@ export default class Post {
   @Field(_type => Community)
   community: ObjectId;
 
-  @Field(() => [Tag])
-  tags: Tag[];
+  @Field(() => PaginatedTags)
+  tags: PaginatedTags;
 
   _doc?: any;
 

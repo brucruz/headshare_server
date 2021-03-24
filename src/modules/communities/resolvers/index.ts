@@ -266,7 +266,7 @@ export default class CommunityResolver {
   }
 
   @FieldResolver(() => PaginatedPosts)
-  async paginatedPosts(
+  async posts(
     @Root() community: Community,
     @Arg('limit', () => Int) limit: number,
     @Arg('cursor', () => String, { nullable: true }) cursor: Date | null,

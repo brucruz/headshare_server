@@ -26,14 +26,44 @@ import transformSlug from '../../../utils/transformSlug';
 import PostOptionsInput from '../../posts/inputs/PostOptionsInput';
 import SuccessResponse from '../../shared/SuccessResponse';
 import PaginatedPosts from '../../posts/resolvers/PaginatedPosts';
+import getPostOptions from '../../posts/getPostOptions';
+import TagOptionsInput from '../inputs/TagOptionsInput';
+import getTagOptions from '../getTagOptions';
 
 @Resolver(_of => Tag)
 export default class TagResolver {
   @Query(() => TagsResponse, { description: 'Queries all tags in database' })
-  async tags(): Promise<TagsResponse> {
-    const tags = await TagModel.find({});
+  async tags(
+    @Arg('limit', () => Int) limit: number,
+    @Arg('cursor', () => String, { nullable: true }) cursor: Date | null,
+    @Arg('tagOptions', () => TagOptionsInput, { nullable: true })
+    tagOptions: TagOptionsInput,
+  ): Promise<TagsResponse> {
+    const realLimit = Math.min(50, limit);
+    const realLimitPlusOne = realLimit + 1;
 
-    return { tags };
+    const cursorFilter = {
+      ...(cursor
+        ? {
+            createdAt: {
+              $gt: cursor,
+            },
+          }
+        : {}),
+    };
+
+    const optionsFilter = tagOptions && getTagOptions(tagOptions);
+
+    const tags = await TagModel.find({ ...cursorFilter, ...optionsFilter })
+      .sort({ createdAt: 'asc' })
+      .limit(realLimitPlusOne);
+
+    return {
+      paginatedTags: {
+        tags: tags.slice(0, realLimit),
+        hasMore: tags.length === realLimitPlusOne,
+      },
+    };
   }
 
   @Query(() => TagResponse, {
@@ -153,7 +183,12 @@ export default class TagResolver {
         ],
       };
     }
-    return { tags };
+    return {
+      paginatedTags: {
+        tags,
+        hasMore: false,
+      },
+    };
   }
 
   @Mutation(_returns => TagResponse)
@@ -422,7 +457,9 @@ export default class TagResolver {
     const realLimit = Math.min(50, limit);
     const realLimitPlusOne = realLimit + 1;
 
-    const filters = {
+    const filters = options && getPostOptions(options);
+
+    const cursorFilter = {
       ...(cursor
         ? {
             createdAt: {
@@ -430,15 +467,14 @@ export default class TagResolver {
             },
           }
         : {}),
-      ...(options?.status
-        ? {
-            status: options.status,
-          }
-        : {}),
     };
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const posts = (await PostModel.find({ tags: tag._doc._id, ...filters })
+    const posts = (await PostModel.find({
+      tags: tag._doc._id,
+      ...cursorFilter,
+      ...filters,
+    })
       .sort({ createdAt: 'desc' })
       .limit(realLimitPlusOne))!;
 
@@ -460,13 +496,9 @@ export default class TagResolver {
     @Arg('postOptions', () => PostOptionsInput, { nullable: true })
     options: PostOptionsInput,
   ): Promise<number> {
-    const filters = {
-      ...(options?.status
-        ? {
-            status: options.status,
-          }
-        : {}),
-    };
+    // const { tagIds, ...postOptions } = options;
+
+    const filters = options && getPostOptions(options);
 
     return PostModel.countDocuments(
       { tags: tag._doc._id, ...filters },

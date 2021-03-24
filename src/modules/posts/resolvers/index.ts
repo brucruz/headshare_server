@@ -18,10 +18,8 @@ import MediaModel from '../../medias/MediaModel';
 import FileType from '../../medias/FileType';
 import UpdateMediaInput from '../../medias/resolvers/input/UpdateMediaInput';
 import RoleModel from '../../roles/RoleModel';
-import ITag from '../../tags/ITag';
 import TagModel from '../../tags/TagModel';
 import { IUser } from '../../users/IUser';
-import UserModel from '../../users/UserModel';
 import CreatePostInput from '../inputs/CreatePostInput';
 import FindBySlugsInput from '../inputs/FindBySlugsInput';
 import UpdatePostInput from '../inputs/UpdatePostInput';
@@ -34,6 +32,10 @@ import SuccessResponse from '../../shared/SuccessResponse';
 import PostOptionsInput from '../inputs/PostOptionsInput';
 import UploadImageInput from '../../medias/resolvers/input/UploadImageInput';
 import S3StorageProvider from '../../shared/providers/StorageProvider/implementations/S3StorageProvider';
+import getPostOptions from '../getPostOptions';
+import PaginatedTags from '../../tags/resolvers/PaginatedTags';
+import TagOptionsInput from '../../tags/inputs/TagOptionsInput';
+import getTagOptions from '../../tags/getTagOptions';
 
 @Resolver(_of => Post)
 export default class PostResolver {
@@ -42,7 +44,7 @@ export default class PostResolver {
     @Arg('limit', () => Int) limit: number,
     @Arg('cursor', () => String, { nullable: true }) cursor: Date | null,
     @Arg('postOptions', () => PostOptionsInput, { nullable: true })
-    { status, communityId, tagIds }: PostOptionsInput,
+    postOptions: PostOptionsInput,
   ): Promise<PostsResponse> {
     const realLimit = Math.min(50, limit);
     const realLimitPlusOne = realLimit + 1;
@@ -57,23 +59,7 @@ export default class PostResolver {
         : {}),
     };
 
-    const optionsFilter = {
-      ...(status
-        ? {
-            status,
-          }
-        : {}),
-      ...(communityId
-        ? {
-            community: communityId,
-          }
-        : {}),
-      ...(tagIds
-        ? {
-            tags: { $in: tagIds },
-          }
-        : {}),
-    };
+    const optionsFilter = postOptions && getPostOptions(postOptions);
 
     const posts = await PostModel.find({ ...cursorFilter, ...optionsFilter })
       .sort({ createdAt: 'desc' })
@@ -92,13 +78,7 @@ export default class PostResolver {
     @Arg('postOptions', () => PostOptionsInput, { nullable: true })
     options: PostOptionsInput,
   ): Promise<PostsResponse> {
-    const filters = {
-      ...(options?.status
-        ? {
-            status: options.status,
-          }
-        : {}),
-    };
+    const filters = options && getPostOptions(options);
 
     const posts = await PostModel.find({
       ...filters,
@@ -848,12 +828,44 @@ export default class PostResolver {
     return (await CommunityModel.findById(post._doc.community))!;
   }
 
-  @FieldResolver(() => [Post])
-  async tags(@Root() post: Post): Promise<ITag[]> {
+  @FieldResolver(() => PaginatedTags)
+  async tags(
+    @Root() post: Post,
+    @Arg('limit', () => Int) limit: number,
+    @Arg('cursor', () => String, { nullable: true }) cursor: Date | null,
+    @Arg('tagOptions', () => TagOptionsInput, { nullable: true })
+    options: TagOptionsInput,
+  ): Promise<PaginatedTags> {
+    const realLimit = Math.min(50, limit);
+    const realLimitPlusOne = realLimit + 1;
+
+    const filters = options && getTagOptions(options);
+
+    const cursorFilter = {
+      ...(cursor
+        ? {
+            createdAt: {
+              $lt: cursor,
+            },
+          }
+        : {}),
+    };
+
     const postTagsIds = post._doc.tags.map((tag: any) => tag._id);
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return (await TagModel.find({ _id: { $in: postTagsIds } }))!;
+    const tags = (await TagModel.find({
+      _id: { $in: postTagsIds },
+      ...cursorFilter,
+      ...filters,
+    })
+      .sort({ createdAt: 'desc' })
+      .limit(realLimitPlusOne))!;
+
+    return {
+      tags: tags.slice(0, realLimit),
+      hasMore: tags.length === realLimitPlusOne,
+    };
   }
 
   @FieldResolver()
