@@ -1,13 +1,12 @@
 import { Field, ObjectType } from 'type-graphql';
-import IPost from '../IPost';
-import Post from '../PostType';
 import FieldError from '../../shared/ErrorResponse';
+import PaginatedPosts from './PaginatedPosts';
 
 @ObjectType()
 export default class PostsResponse {
   @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
 
-  @Field(() => [Post], { nullable: true })
-  posts?: IPost[];
+  @Field(() => PaginatedPosts, { nullable: true })
+  paginatedPosts?: PaginatedPosts;
 }

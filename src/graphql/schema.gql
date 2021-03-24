@@ -41,6 +41,7 @@ type Community {
 
   """The number of subscribed users in this community"""
   membersCount: Int!
+  paginatedPosts(cursor: String, limit: Int!): PaginatedPosts!
   posts: [Post!]!
   removedAt: DateTime
   roles: [Role!]!
@@ -342,6 +343,11 @@ type Mutation {
 """Mongo object id scalar type"""
 scalar ObjectId
 
+type PaginatedPosts {
+  hasMore: Boolean!
+  posts: [Post!]!
+}
+
 """The Posts model"""
 type Post {
   _id: ObjectId!
@@ -391,8 +397,14 @@ type Post {
 }
 
 input PostOptionsInput {
+  """Specifies the community id"""
+  communityId: String
+
   """Specifies which post status should be retrieved"""
   status: PostStatus
+
+  """Specifies the tag ids"""
+  tagIds: [String!]
 }
 
 type PostResponse {
@@ -402,7 +414,7 @@ type PostResponse {
 
 type PostsResponse {
   errors: [ErrorResponse!]
-  posts: [Post!]
+  paginatedPosts: PaginatedPosts
 }
 
 """The possible status a post might have"""
@@ -451,7 +463,7 @@ type Query {
   medias: MediasResponse!
 
   """Queries all posts in database"""
-  posts(cursor: String, limit: Int!): PostsResponse!
+  posts(cursor: String, limit: Int!, postOptions: PostOptionsInput): PostsResponse!
 
   """Queries an role by providing an email. If none is found, return null."""
   role(id: CreateRoleInput!): RoleResponse

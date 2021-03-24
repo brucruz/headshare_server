@@ -8,4 +8,16 @@ export default class PostOptionsInput {
     nullable: true,
   })
   status?: PostStatus;
+
+  @Field(() => String, {
+    description: 'Specifies the community id',
+    nullable: true,
+  })
+  communityId?: any;
+
+  @Field(() => [String], {
+    description: 'Specifies the tag ids',
+    nullable: true,
+  })
+  tagIds?: any[];
 }

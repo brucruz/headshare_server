@@ -10,6 +10,8 @@ import connectRedis from 'connect-redis';
 
 import schema from './graphql/schema';
 import { __prod__, COOKIE_NAME } from './constants';
+import userLoader from './modules/users/userLoader';
+import postLoader from './modules/posts/postLoader';
 
 const main = async () => {
   const mongodbUsername = process.env.MONGODB_USERNAME;
@@ -36,7 +38,13 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await schema,
-    context: ({ req, res }) => ({ req, res }),
+    context: ({ req, res }) => ({
+      req,
+      res,
+      redis,
+      userLoader: userLoader(),
+      postLoader: postLoader(),
+    }),
   });
   const app = Express();
 

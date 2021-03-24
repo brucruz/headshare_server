@@ -12,9 +12,7 @@ import {
 import { ApolloContext } from '../../../apollo-server/ApolloContext';
 import CommunityModel from '../../communities/CommunityModel';
 import ICommunity from '../../communities/ICommunity';
-import IPost from '../../posts/IPost';
 import PostModel from '../../posts/PostModel';
-import Post from '../../posts/PostType';
 import RoleModel from '../../roles/RoleModel';
 import CreateTagInput from '../inputs/CreateTagInput';
 import FindByTagsInput from '../inputs/FindByTagsInput';
@@ -27,6 +25,7 @@ import TagsResponse from './TagsResponse';
 import transformSlug from '../../../utils/transformSlug';
 import PostOptionsInput from '../../posts/inputs/PostOptionsInput';
 import SuccessResponse from '../../shared/SuccessResponse';
+import PaginatedPosts from '../../posts/resolvers/PaginatedPosts';
 
 @Resolver(_of => Tag)
 export default class TagResolver {
@@ -412,15 +411,16 @@ export default class TagResolver {
     };
   }
 
-  @FieldResolver(() => [Post])
+  @FieldResolver(() => PaginatedPosts)
   async posts(
     @Root() tag: Tag,
     @Arg('limit', () => Int) limit: number,
     @Arg('cursor', () => String, { nullable: true }) cursor: Date | null,
     @Arg('postOptions', () => PostOptionsInput, { nullable: true })
     options: PostOptionsInput,
-  ): Promise<IPost[]> {
+  ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
+    const realLimitPlusOne = realLimit + 1;
 
     const filters = {
       ...(cursor
@@ -438,9 +438,14 @@ export default class TagResolver {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return (await PostModel.find({ tags: tag._doc._id, ...filters })
+    const posts = (await PostModel.find({ tags: tag._doc._id, ...filters })
       .sort({ createdAt: 'desc' })
-      .limit(realLimit))!;
+      .limit(realLimitPlusOne))!;
+
+    return {
+      posts: posts.slice(0, realLimit),
+      hasMore: posts.length === realLimitPlusOne,
+    };
   }
 
   @FieldResolver()

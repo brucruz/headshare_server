@@ -12,9 +12,8 @@ import {
 import { ApolloContext } from '../../../apollo-server/ApolloContext';
 import IMedia from '../../medias/IMedia';
 import MediaModel from '../../medias/MediaModel';
-import IPost from '../../posts/IPost';
 import PostModel from '../../posts/PostModel';
-import Post from '../../posts/PostType';
+import PaginatedPosts from '../../posts/resolvers/PaginatedPosts';
 import IRole, { RoleOptions } from '../../roles/IRole';
 import RoleModel from '../../roles/RoleModel';
 import Role from '../../roles/RoleType';
@@ -266,10 +265,37 @@ export default class CommunityResolver {
     return { community };
   }
 
-  @FieldResolver(() => [Post])
-  async posts(@Root() community: Community): Promise<IPost[]> {
+  @FieldResolver(() => PaginatedPosts)
+  async paginatedPosts(
+    @Root() community: Community,
+    @Arg('limit', () => Int) limit: number,
+    @Arg('cursor', () => String, { nullable: true }) cursor: Date | null,
+  ): Promise<PaginatedPosts> {
+    const realLimit = Math.min(50, limit);
+    const realLimitPlusOne = realLimit + 1;
+
+    const cursorFilter = {
+      ...(cursor
+        ? {
+            createdAt: {
+              $lt: cursor,
+            },
+          }
+        : {}),
+    };
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return (await PostModel.find({ community: community._doc._id }))!;
+    const posts = await PostModel.find({
+      community: community._doc._id,
+      ...cursorFilter,
+    })
+      .sort({ createdAt: 'desc' })
+      .limit(realLimitPlusOne)!;
+
+    return {
+      posts: posts.slice(0, realLimit),
+      hasMore: posts.length === realLimitPlusOne,
+    };
   }
 
   @FieldResolver(() => [Role])

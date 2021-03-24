@@ -41,8 +41,11 @@ export default class PostResolver {
   async posts(
     @Arg('limit', () => Int) limit: number,
     @Arg('cursor', () => String, { nullable: true }) cursor: Date | null,
+    @Arg('postOptions', () => PostOptionsInput, { nullable: true })
+    { status, communityId, tagIds }: PostOptionsInput,
   ): Promise<PostsResponse> {
     const realLimit = Math.min(50, limit);
+    const realLimitPlusOne = realLimit + 1;
 
     const cursorFilter = {
       ...(cursor
@@ -54,11 +57,34 @@ export default class PostResolver {
         : {}),
     };
 
-    const posts = await PostModel.find({ ...cursorFilter })
-      .sort({ createdAt: 'desc' })
-      .limit(realLimit);
+    const optionsFilter = {
+      ...(status
+        ? {
+            status,
+          }
+        : {}),
+      ...(communityId
+        ? {
+            community: communityId,
+          }
+        : {}),
+      ...(tagIds
+        ? {
+            tags: { $in: tagIds },
+          }
+        : {}),
+    };
 
-    return { posts };
+    const posts = await PostModel.find({ ...cursorFilter, ...optionsFilter })
+      .sort({ createdAt: 'desc' })
+      .limit(realLimitPlusOne);
+
+    return {
+      paginatedPosts: {
+        posts: posts.slice(0, realLimit),
+        hasMore: posts.length === realLimitPlusOne,
+      },
+    };
   }
 
   @Query(() => PostsResponse, { description: 'Queries all posts in database' })
@@ -78,7 +104,12 @@ export default class PostResolver {
       ...filters,
     });
 
-    return { posts };
+    return {
+      paginatedPosts: {
+        posts,
+        hasMore: false,
+      },
+    };
   }
 
   @Query(() => PostResponse, {
@@ -802,9 +833,13 @@ export default class PostResolver {
   }
 
   @FieldResolver()
-  async creator(@Root() post: Post): Promise<IUser> {
+  async creator(
+    @Root() post: Post,
+    @Ctx() { userLoader }: ApolloContext,
+  ): Promise<IUser> {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return (await UserModel.findById(post._doc.creator))!;
+    // return (await UserModel.findById(post._doc.creator))!;
+    return userLoader.load(post._doc.creator);
   }
 
   @FieldResolver()
