@@ -111,13 +111,13 @@ input CreatePostInput {
 
 input CreateRoleInput {
   """Community of which the role is about"""
-  community: ObjectId!
+  communityId: String!
 
   """User role in community"""
   role: RoleOptions!
 
   """User of which the role is about"""
-  user: ObjectId!
+  userId: String!
 }
 
 input CreateTagInput {
@@ -308,7 +308,7 @@ type Mutation {
   """Users can create a community"""
   createCommunity(communityData: CreateCommunityInput!): CommunityResponse!
   createPost(communitySlug: String!, data: CreatePostInput!): PostResponse!
-  createRole(data: CreateRoleInput!): RoleResponse!
+  createRole(data: CreateRoleInput!): SuccessResponse!
   createTag(communitySlug: String!, data: CreateTagInput!): TagResponse!
 
   """Owners may """

@@ -1,7 +1,4 @@
 import { Field, InputType } from 'type-graphql';
-import ObjectIdScalar from '../../../type-graphql/ObjectIdScalar';
-import Community from '../../communities/CommunityType';
-import User from '../../users/UserType';
 import { RoleOptions } from '../IRole';
 import Role from '../RoleType';
 
@@ -10,13 +7,13 @@ export default class CreateRoleInput implements Partial<Role> {
   @Field(() => RoleOptions, { description: 'User role in community' })
   role: RoleOptions;
 
-  @Field(() => ObjectIdScalar, {
+  @Field(() => String, {
     description: 'User of which the role is about',
   })
-  user: User;
+  userId: string;
 
-  @Field(() => ObjectIdScalar, {
+  @Field(() => String, {
     description: 'Community of which the role is about',
   })
-  community: Community;
+  communityId: string;
 }

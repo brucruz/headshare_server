@@ -9,6 +9,7 @@ import {
 } from 'type-graphql';
 import CommunityModel from '../../communities/CommunityModel';
 import ICommunity from '../../communities/ICommunity';
+import SuccessResponse from '../../shared/SuccessResponse';
 import { IUser } from '../../users/IUser';
 import UserModel from '../../users/UserModel';
 import CreateRoleInput from '../inputs/CreateRoleInput';
@@ -94,12 +95,12 @@ export default class RoleResolver {
     return { role };
   }
 
-  @Mutation(_returns => RoleResponse)
+  @Mutation(_returns => SuccessResponse)
   async createRole(
     @Arg('data', () => CreateRoleInput)
-    { role, community, user }: CreateRoleInput,
-  ): Promise<RoleResponse> {
-    const communityData = await CommunityModel.findById(community);
+    { role, communityId, userId }: CreateRoleInput,
+  ): Promise<SuccessResponse> {
+    const communityData = await CommunityModel.findById(communityId);
 
     if (!communityData) {
       return {
@@ -109,10 +110,11 @@ export default class RoleResolver {
             message: 'You must inform a valid community to create a role',
           },
         ],
+        success: false,
       };
     }
 
-    const userData = await UserModel.findById(user);
+    const userData = await UserModel.findById(userId);
 
     if (!userData) {
       return {
@@ -122,6 +124,7 @@ export default class RoleResolver {
             message: 'You must inform a valid user to create a role',
           },
         ],
+        success: false,
       };
     }
 
@@ -145,18 +148,21 @@ export default class RoleResolver {
               'Thew informed user has already a defined role in the informed community',
           },
         ],
+        success: false,
       };
     }
 
     const userRole = new RoleModel({
       role,
-      user,
-      community,
+      user: userData._id,
+      community: communityData._id,
     });
 
     await userRole.save();
 
-    return { role: userRole };
+    return {
+      success: true,
+    };
   }
 
   @Mutation(() => RoleResponse, { nullable: true })

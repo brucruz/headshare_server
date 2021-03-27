@@ -177,8 +177,8 @@ export default class UserResolver {
       return {
         errors: [
           {
-            field: 'email or password',
-            message: 'Email/password combination is invalid',
+            field: 'email',
+            message: 'User does not exist',
           },
         ],
       };
@@ -188,7 +188,11 @@ export default class UserResolver {
       return {
         errors: [
           {
-            field: 'email or password',
+            field: 'email',
+            message: 'Email/password combination is invalid',
+          },
+          {
+            field: 'password',
             message: 'Email/password combination is invalid',
           },
         ],
@@ -201,7 +205,11 @@ export default class UserResolver {
       return {
         errors: [
           {
-            field: 'email or password',
+            field: 'email',
+            message: 'Email/password combination is invalid',
+          },
+          {
+            field: 'password',
             message: 'Email/password combination is invalid',
           },
         ],
