@@ -16,7 +16,7 @@
   "lint-staged": {
     "*.{ts,tsx}": [
       "eslint --fix",
-      "cross-env CI=true yarn test2 --bail --findRelatedTests"
+      "cross-env CI=true yarn test --bail --findRelatedTests"
     ]
   },
   "dependencies": {
