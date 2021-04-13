@@ -5,5 +5,7 @@ declare namespace NodeJS {
       post: number;
       community: number;
     };
+    __MONGO_URI__: string;
+    __MONGO_DB_NAME__: string;
   }
 }

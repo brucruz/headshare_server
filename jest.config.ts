@@ -105,7 +105,8 @@ export default {
   // resetMocks: false,
 
   // Reset the module registry before running each individual test
-  // resetModules: false,
+  resetModules: false, // default
+  // resetModules: true,
 
   // A path to a custom resolver
   // resolver: undefined,
@@ -138,6 +139,7 @@ export default {
 
   // The test environment that will be used for testing
   testEnvironment: 'node',
+  // testEnvironment: '<rootDir>/src/test/environment/mongodb',
 
   // Options that will be passed to the testEnvironment
   // testEnvironmentOptions: {},
@@ -152,9 +154,7 @@ export default {
   // ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  // testPathIgnorePatterns: [
-  //   "/node_modules/"
-  // ],
+  testPathIgnorePatterns: ['/node_modules/', '/build/', '/dist/'],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],

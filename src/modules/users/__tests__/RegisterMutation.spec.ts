@@ -1,6 +1,7 @@
+import { createTestClient } from 'apollo-server-testing';
 import { createUser } from '../../../test/createRows';
 import { cleanDB, connectToDB, disconnectDB } from '../../../test/testDb';
-import runQuery from '../../../test/testRun';
+import getTestServer from '../../../test/testRun';
 
 const gql = String.raw;
 
@@ -10,29 +11,26 @@ beforeEach(cleanDB);
 
 afterAll(disconnectDB);
 
-describe('UserRegisterMutation', () => {
+describe('a visitor attempting to register as user', () => {
+  const mutation = gql`
+    mutation M($input: RegisterUserInput!) {
+      register(data: $input) {
+        user {
+          name
+          email
+        }
+        errors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
   it('should register an user', async () => {
     const name = 'John';
     const email = 'johndoe@example.com';
     const password = '123456';
-
-    const mutation = gql`
-      mutation M($input: RegisterUserInput!) {
-        register(data: $input) {
-          data {
-            token
-            user {
-              name
-              email
-            }
-          }
-          errors {
-            field
-            message
-          }
-        }
-      }
-    `;
 
     const variables = {
       input: {
@@ -42,40 +40,27 @@ describe('UserRegisterMutation', () => {
       },
     };
 
-    const result = await runQuery(mutation, variables);
+    const testServer = await getTestServer();
+
+    const { mutate } = createTestClient(testServer());
+    const result = await mutate({
+      mutation,
+      variables,
+    });
 
     expect(result.errors).toBeUndefined();
-    expect(JSON.stringify(result.data?.register.data.user.name)).toEqual(
+    expect(JSON.stringify(result.data?.register.user.name)).toEqual(
       JSON.stringify(name),
     );
-    expect(JSON.stringify(result.data?.register.data.user.email)).toEqual(
+    expect(JSON.stringify(result.data?.register.user.email)).toEqual(
       JSON.stringify(email),
     );
-    expect(result.data?.register.data.token).toBeTruthy();
   });
 
   it('should not register an user with an existent email', async () => {
     const name = 'John';
     const email = 'johndoe@example.com';
     const password = '123456';
-
-    const mutation = gql`
-      mutation M($input: RegisterUserInput!) {
-        register(data: $input) {
-          data {
-            token
-            user {
-              name
-              email
-            }
-          }
-          errors {
-            field
-            message
-          }
-        }
-      }
-    `;
 
     const variables = {
       input: {
@@ -87,10 +72,16 @@ describe('UserRegisterMutation', () => {
 
     await createUser({ email });
 
-    const result = await runQuery(mutation, variables);
+    const testServer = await getTestServer();
+
+    const { mutate } = createTestClient(testServer());
+    const result = await mutate({
+      mutation,
+      variables,
+    });
 
     expect(result.errors).toBeUndefined();
-    expect(result.data?.register.data).toBeFalsy();
+    expect(result.data?.register.user).toBeFalsy();
     expect(result.data?.register.errors).toBeTruthy();
   });
 });

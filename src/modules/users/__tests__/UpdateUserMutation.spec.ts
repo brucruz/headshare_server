@@ -1,6 +1,7 @@
+import { createTestClient } from 'apollo-server-testing';
 import { createUser } from '../../../test/createRows';
 import { cleanDB, connectToDB, disconnectDB } from '../../../test/testDb';
-import runQuery from '../../../test/testRun';
+import getTestServer from '../../../test/testRun';
 // import { IUser } from '../IUser';
 
 const gql = String.raw;
@@ -9,30 +10,30 @@ const gql = String.raw;
 
 const email = 'johndoe@example.com';
 
-describe('UpdateUserMutation', () => {
-  beforeAll(connectToDB);
+beforeAll(connectToDB);
 
-  beforeEach(cleanDB);
+beforeEach(cleanDB);
 
-  afterAll(disconnectDB);
+afterAll(disconnectDB);
+
+describe('an attempt to update an user info', () => {
+  const mutation = gql`
+    mutation M($_id: ObjectId!, $updateData: EditMeInput!) {
+      updateUser(_id: $_id, updateData: $updateData) {
+        user {
+          name
+          surname
+        }
+        errors {
+          field
+          message
+        }
+      }
+    }
+  `;
 
   it('should update an user', async () => {
     const user = await createUser({ email });
-
-    const mutation = gql`
-      mutation M($_id: ObjectId!, $updateData: EditMeInput!) {
-        updateUser(_id: $_id, updateData: $updateData) {
-          user {
-            name
-            surname
-          }
-          errors {
-            field
-            message
-          }
-        }
-      }
-    `;
 
     const variables = {
       _id: user._id.toString(),
@@ -42,7 +43,13 @@ describe('UpdateUserMutation', () => {
       },
     };
 
-    const result = await runQuery(mutation, variables);
+    const testServer = await getTestServer(user._id);
+
+    const { mutate } = createTestClient(testServer());
+    const result = await mutate({
+      mutation,
+      variables,
+    });
 
     expect(result.errors).toBeFalsy();
     expect(JSON.stringify(result.data?.updateUser.user.name)).toEqual(
@@ -54,33 +61,24 @@ describe('UpdateUserMutation', () => {
   });
 
   it('should not update an non-existent user', async () => {
-    const mutation = gql`
-      mutation M($_id: ObjectId!, $updateData: EditMeInput!) {
-        updateUser(_id: $_id, updateData: $updateData) {
-          user {
-            name
-            surname
-          }
-          errors {
-            field
-            message
-          }
-        }
-      }
-    `;
-
     const variables = {
-      _id: 'non-existent-id',
+      _id: '123456789012345678901234', // non-existent-id
       updateData: {
         name: 'Jane',
         surname: 'Doe',
       },
     };
 
-    const result = await runQuery(mutation, variables);
+    const testServer = await getTestServer();
 
-    expect(result.errors).toBeTruthy();
-    expect(JSON.stringify(result.data?.updateUser.user.name)).toBeFalsy();
-    expect(JSON.stringify(result.data?.updateUser.user.surname)).toBeFalsy();
+    const { mutate } = createTestClient(testServer());
+    const result = await mutate({
+      mutation,
+      variables,
+    });
+
+    expect(result.errors).toBeUndefined();
+    expect(result.data?.updateUser.errors).toBeTruthy();
+    expect(result.data?.updateUser.user).toBeFalsy();
   });
 });

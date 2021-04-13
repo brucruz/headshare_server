@@ -1,37 +1,40 @@
+import { createTestClient } from 'apollo-server-testing';
 import { createUser } from '../../../test/createRows';
-import { cleanDB, connectToDB, disconnectDB } from '../../../test/testDb';
-import runQuery from '../../../test/testRun';
+import getTestServer, {
+  clearDatabase,
+  connectMongoose,
+  disconnectMongoose,
+} from '../../../test/testRun';
 
 const gql = String.raw;
 
-beforeAll(connectToDB);
+beforeAll(connectMongoose);
 
-beforeEach(cleanDB);
+beforeEach(clearDatabase);
 
-afterAll(disconnectDB);
+afterAll(disconnectMongoose);
 
-describe('UserLoginMutation', () => {
+describe('a user attempting to login', () => {
+  const mutation = gql`
+    mutation M($input: LoginUserInput!) {
+      login(loginData: $input) {
+        user {
+          _id
+          name
+          email
+        }
+        errors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
   it('should login an user', async () => {
     const password = '123456';
 
     const user = await createUser({ password });
-
-    const mutation = gql`
-      mutation M($input: LoginUserInput!) {
-        login(loginData: $input) {
-          data {
-            token
-            user {
-              _id
-            }
-          }
-          errors {
-            field
-            message
-          }
-        }
-      }
-    `;
 
     const variables = {
       input: {
@@ -40,36 +43,24 @@ describe('UserLoginMutation', () => {
       },
     };
 
-    const result = await runQuery(mutation, variables);
+    const testServer = await getTestServer(user._id);
+
+    const { mutate } = createTestClient(testServer());
+    const result = await mutate({
+      mutation,
+      variables,
+    });
 
     expect(result.errors).toBeUndefined();
-    expect(JSON.stringify(result.data?.login.data.user._id)).toEqual(
+    expect(JSON.stringify(result.data?.login.user._id)).toEqual(
       JSON.stringify(user._id),
     );
-    expect(result.data?.login.data.token).toBeTruthy();
   });
 
   it('should not login an user with the incorrect password', async () => {
     const password = '123456';
 
     const user = await createUser({ password });
-
-    const mutation = gql`
-      mutation M($input: LoginUserInput!) {
-        login(loginData: $input) {
-          data {
-            token
-            user {
-              _id
-            }
-          }
-          errors {
-            field
-            message
-          }
-        }
-      }
-    `;
 
     const variables = {
       input: {
@@ -78,32 +69,20 @@ describe('UserLoginMutation', () => {
       },
     };
 
-    const result = await runQuery(mutation, variables);
+    const testServer = await getTestServer(user._id);
+
+    const { mutate } = createTestClient(testServer());
+    const result = await mutate({
+      mutation,
+      variables,
+    });
 
     expect(result.errors).toBeUndefined();
     expect(result.data?.login.errors).toBeTruthy();
-    expect(result.data?.login.data).toBeFalsy();
   });
 
   it('should not login an user who does not have an created password', async () => {
     const user = await createUser({ password: undefined });
-
-    const mutation = gql`
-      mutation M($input: LoginUserInput!) {
-        login(loginData: $input) {
-          data {
-            token
-            user {
-              _id
-            }
-          }
-          errors {
-            field
-            message
-          }
-        }
-      }
-    `;
 
     const variables = {
       input: {
@@ -112,33 +91,19 @@ describe('UserLoginMutation', () => {
       },
     };
 
-    const result = await runQuery(mutation, variables);
+    const testServer = await getTestServer(user._id);
+
+    const { mutate } = createTestClient(testServer());
+    const result = await mutate({
+      mutation,
+      variables,
+    });
 
     expect(result.errors).toBeUndefined();
     expect(result.data?.login.errors).toBeTruthy();
-    expect(result.data?.login.data).toBeFalsy();
   });
 
   it('should not login an non-existent user', async () => {
-    await createUser();
-
-    const mutation = gql`
-      mutation M($input: LoginUserInput!) {
-        login(loginData: $input) {
-          data {
-            token
-            user {
-              _id
-            }
-          }
-          errors {
-            field
-            message
-          }
-        }
-      }
-    `;
-
     const variables = {
       input: {
         email: 'johndoe@example.com',
@@ -146,10 +111,15 @@ describe('UserLoginMutation', () => {
       },
     };
 
-    const result = await runQuery(mutation, variables);
+    const testServer = await getTestServer();
+
+    const { mutate } = createTestClient(testServer());
+    const result = await mutate({
+      mutation,
+      variables,
+    });
 
     expect(result.errors).toBeUndefined();
     expect(result.data?.login.errors).toBeTruthy();
-    expect(result.data?.login.data).toBeFalsy();
   });
 });

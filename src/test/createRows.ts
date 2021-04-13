@@ -18,10 +18,16 @@ export const createUser = async (
 ): Promise<IUser> => {
   const { name, email, password, ...rest } = args;
 
-  return new UserModel({
-    name: name || 'User #$',
-    email: email || 'user@example.com',
+  // console.log(global.__COUNTERS__);
+
+  // const n = (global.__COUNTERS__.user += 1);
+
+  const user = await new UserModel({
+    name: name || `Normal user ${'n'}`,
+    email: email || `user-${'n'}@example.com`,
     password: await hash(password || '123456789'),
     ...rest,
   }).save();
+
+  return user;
 };
