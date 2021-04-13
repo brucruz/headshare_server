@@ -227,7 +227,17 @@ export default class UserResolver {
   async updateUser(
     @Arg('_id', () => ObjectIdScalar) _id: ObjectId,
     @Arg('updateData', () => EditMeInput)
-    { name, surname, email, password, avatar }: EditMeInput,
+    {
+      name,
+      surname,
+      email,
+      password,
+      avatar,
+      address,
+      documents,
+      phone,
+      birthday,
+    }: EditMeInput,
   ): Promise<UserResponse> {
     const newData = {
       $set: {
@@ -236,6 +246,10 @@ export default class UserResolver {
         ...(email ? { email } : {}),
         ...(password ? { password: await hash(password) } : {}),
         ...(avatar ? { avatar } : {}),
+        ...(address ? { address } : {}),
+        ...(documents ? { documents } : {}),
+        ...(phone ? { phone } : {}),
+        ...(birthday ? { birthday } : {}),
       },
     };
 

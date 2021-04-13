@@ -31,6 +31,30 @@ const Schema = new mongoose.Schema(
     avatar_url: {
       type: String,
     },
+    address: {
+      street: { type: String },
+      number: { type: String },
+      complement: { type: String },
+      neighbourhood: { type: String },
+      city: { type: String },
+      zipcode: { type: String },
+      state: { type: String },
+      country: { type: String },
+    },
+    documents: [
+      {
+        type: { type: String },
+        number: { type: String },
+      },
+    ],
+    phone: {
+      countryCode: { type: String },
+      regionalCode: { type: String },
+      phone: { type: String },
+    },
+    birthday: {
+      type: Date,
+    },
     posts: [
       {
         type: ObjectId,

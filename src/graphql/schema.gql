@@ -3,6 +3,33 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+"""Address model"""
+type Address {
+  """Address city name"""
+  city: String
+
+  """Address complementary info"""
+  complement: String
+
+  """Address country name"""
+  country: String
+
+  """Address neighbourhood"""
+  neighbourhood: String
+
+  """Street number"""
+  number: String
+
+  """Address state name"""
+  state: String
+
+  """Street name"""
+  street: String
+
+  """Address zipcode"""
+  zipcode: String
+}
+
 type CommunitiesResponse {
   communities: [Community!]
   errors: [ErrorResponse!]
@@ -66,6 +93,32 @@ type CommunityResponse {
   errors: [ErrorResponse!]
 }
 
+input CreateAddressInput {
+  """Address city name"""
+  city: String!
+
+  """Address complementary info"""
+  complement: String
+
+  """Address country name"""
+  country: String!
+
+  """Address neighbourhood"""
+  neighbourhood: String
+
+  """Street number"""
+  number: String!
+
+  """Address state name"""
+  state: String
+
+  """Street name"""
+  street: String!
+
+  """Address zipcode"""
+  zipcode: String!
+}
+
 input CreateCommunityInput {
   """Community description"""
   description: String
@@ -81,6 +134,25 @@ input CreateCommunityInput {
 
   """Community title"""
   title: String!
+}
+
+input CreatePersonalDocumentInput {
+  """Document id number"""
+  number: String!
+
+  """Document id type, excluding company documents"""
+  type: String!
+}
+
+input CreatePhoneInput {
+  """Phone number country code"""
+  countryCode: String!
+
+  """Phone number"""
+  phone: String!
+
+  """Phone number regional code (DDD), if existent"""
+  regionalCode: String
 }
 
 input CreatePostInput {
@@ -137,8 +209,17 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 scalar DateTime
 
 input EditMeInput {
+  """User address"""
+  address: CreateAddressInput
+
   """User avatar image link"""
   avatar: String
+
+  """User birthday"""
+  birthday: DateTime
+
+  """User personal documents"""
+  documents: [CreatePersonalDocumentInput!]
 
   """User email to be used on login"""
   email: String
@@ -148,6 +229,9 @@ input EditMeInput {
 
   """User password to be used on login"""
   password: String
+
+  """User phone info"""
+  phone: CreatePhoneInput
 
   """User surname"""
   surname: String
@@ -350,6 +434,27 @@ type PaginatedPosts {
 type PaginatedTags {
   hasMore: Boolean!
   tags: [Tag!]!
+}
+
+"""Personal Document Model"""
+type PersonalDocument {
+  """Document id number"""
+  number: String!
+
+  """Document id type, excluding company documents"""
+  type: String!
+}
+
+"""Phone Info Model"""
+type Phone {
+  """Phone number country code"""
+  countryCode: String!
+
+  """Phone number"""
+  phone: String!
+
+  """Phone number regional code (DDD), if existent"""
+  regionalCode: String
 }
 
 """The Posts model"""
@@ -743,11 +848,20 @@ input UploadMediaInput {
 type User {
   _id: ObjectId!
 
+  """User address"""
+  address: Address
+
   """User avatar image link"""
   avatar: String
 
+  """User birthday"""
+  birthday: DateTime
+
   """User creation date"""
   createdAt: DateTime!
+
+  """User personal documents"""
+  documents: [PersonalDocument!]!
 
   """User email to be used on login"""
   email: String!
@@ -755,6 +869,9 @@ type User {
 
   """User name"""
   name: String!
+
+  """User phone info"""
+  phone: Phone
   posts: [Post!]!
   removedAt: DateTime
   roles: [Role!]!

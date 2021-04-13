@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { hash } from 'argon2';
 import { ObjectId } from 'mongodb';
 import { Field, ObjectType } from 'type-graphql';
@@ -5,6 +6,9 @@ import DateTimeScalar from '../../type-graphql/DateTimeScalar';
 import ObjectIdScalar from '../../type-graphql/ObjectIdScalar';
 import Post from '../posts/PostType';
 import Role from '../roles/RoleType';
+import Address from './AddressType';
+import PersonalDocument from './PersonalDocumentType';
+import Phone from './PhoneType';
 
 @ObjectType({ description: 'The Users model' })
 export default class User {
@@ -27,6 +31,18 @@ export default class User {
     nullable: true,
   })
   avatar?: string;
+
+  @Field(() => Address, { description: 'User address', nullable: true })
+  address?: Address;
+
+  @Field(() => [PersonalDocument], { description: 'User personal documents' })
+  documents: PersonalDocument[];
+
+  @Field(() => Phone, { description: 'User phone info', nullable: true })
+  phone?: Phone;
+
+  @Field(() => Date, { description: 'User birthday', nullable: true })
+  birthday?: Date;
 
   @Field(() => [Post])
   posts: Post[];

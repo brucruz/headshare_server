@@ -1,8 +1,10 @@
 import { InputType, Field } from 'type-graphql';
-import { IUser } from '../IUser';
+import CreateAddressInput from './CreateAddressInput';
+import CreatePersonalDocumentInput from './CreatePersonalDocumentInput';
+import CreatePhoneInput from './CreatePhoneInput';
 
 @InputType()
-export default class EditMeInput implements Partial<IUser> {
+export default class EditMeInput {
   @Field(() => String, { description: 'User name', nullable: true })
   name?: string;
 
@@ -26,4 +28,25 @@ export default class EditMeInput implements Partial<IUser> {
     nullable: true,
   })
   avatar?: string;
+
+  @Field(() => CreateAddressInput, {
+    description: 'User address',
+    nullable: true,
+  })
+  address?: CreateAddressInput;
+
+  @Field(() => [CreatePersonalDocumentInput], {
+    description: 'User personal documents',
+    nullable: true,
+  })
+  documents?: CreatePersonalDocumentInput[];
+
+  @Field(() => CreatePhoneInput, {
+    description: 'User phone info',
+    nullable: true,
+  })
+  phone?: CreatePhoneInput;
+
+  @Field(() => Date, { description: 'User birthday', nullable: true })
+  birthday?: Date;
 }
