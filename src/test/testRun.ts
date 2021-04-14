@@ -7,6 +7,7 @@ import redis from 'redis';
 import schema from '../graphql/schema';
 import postLoader from '../modules/posts/postLoader';
 import userLoader from '../modules/users/userLoader';
+import { restartCounters, startCounters } from './createRows';
 
 const mongod = new MongoMemoryServer();
 
@@ -19,12 +20,12 @@ async function getMongoMemoryUri() {
 // ensure the NODE_ENV is set to 'test'
 // this is helpful when you would like to change behavior when testing
 // jest does this automatically for you if no NODE_ENV is set
-// process.env.NODE_ENV = 'test';
+process.env.NODE_ENV = 'test';
 
 const mongooseOptions: ConnectOptions = {
-  // autoIndex: false,
-  // autoReconnect: false,
-  // connectTimeoutMS: 10000,
+  autoIndex: false,
+  autoReconnect: false,
+  connectTimeoutMS: 10000,
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
@@ -35,7 +36,9 @@ const mongooseOptions: ConnectOptions = {
 // mongoose.set('debug', true);
 
 export async function connectMongoose(): Promise<typeof mongoose | void> {
-  // jest.setTimeout(20000);
+  jest.setTimeout(20000);
+  startCounters();
+
   // return mongoose.connect(global.__MONGO_URI__, {
 
   await mongoose.connect(
@@ -77,7 +80,7 @@ export async function disconnectMongoose(): Promise<void> {
 
 export async function clearDbAndRestartCounters(): Promise<void> {
   await clearDatabase();
-  // createRows.restartCounters();
+  restartCounters();
 }
 
 const getTestServer = async (userId = ''): Promise<() => ApolloServerBase> => {

@@ -9,6 +9,7 @@ import DateTimeScalar from '../type-graphql/DateTimeScalar';
 import TagResolver from '../modules/tags/resolvers';
 import RoleResolver from '../modules/roles/resolvers';
 import MediaResolver from '../modules/medias/resolvers';
+import CardResolver from '../modules/cards/resolvers';
 
 const { ObjectId } = mongoose.Schema.Types;
 
@@ -20,6 +21,7 @@ const schema = buildSchema({
     TagResolver,
     RoleResolver,
     MediaResolver,
+    CardResolver,
   ],
   emitSchemaFile: path.resolve(__dirname, 'schema.gql'),
   // dateScalarMode: 'isoDate',

@@ -30,16 +30,17 @@ const Schema = new mongoose.Schema(
     },
     avatar_url: {
       type: String,
+      trim: true,
     },
     address: {
-      street: { type: String },
-      number: { type: String },
-      complement: { type: String },
-      neighbourhood: { type: String },
-      city: { type: String },
-      zipcode: { type: String },
-      state: { type: String },
-      country: { type: String },
+      street: { type: String, trim: true },
+      number: { type: String, trim: true },
+      complement: { type: String, trim: true },
+      neighbourhood: { type: String, trim: true },
+      city: { type: String, trim: true },
+      zipcode: { type: String, trim: true },
+      state: { type: String, trim: true },
+      country: { type: String, trim: true },
     },
     documents: [
       {

@@ -30,6 +30,47 @@ type Address {
   zipcode: String
 }
 
+"""The Cards model"""
+type Card {
+  _id: ObjectId!
+
+  """Card brand"""
+  brand: String!
+
+  """Card creation date"""
+  createdAt: DateTime!
+
+  """Card expiration date"""
+  expirationDate: String!
+
+  """Card fingerprint"""
+  fingerprint: String!
+
+  """Card first 6 digits"""
+  firstDigits: String!
+
+  """Card holder name"""
+  holderName: String!
+  isActive: Boolean!
+
+  """Indicates if this card is its user main one"""
+  isMain: Boolean
+
+  """Card last 4 digits"""
+  lastDigits: String!
+
+  """Card ID at Pagarme"""
+  pagarmeId: String!
+  removedAt: DateTime
+
+  """Card last update date"""
+  updatedAt: DateTime
+  user: User!
+
+  """Card is valid if it is not expired"""
+  valid: Boolean!
+}
+
 type CommunitiesResponse {
   communities: [Community!]
   errors: [ErrorResponse!]
@@ -117,6 +158,32 @@ input CreateAddressInput {
 
   """Address zipcode"""
   zipcode: String!
+}
+
+input CreateCardInput {
+  """Card brand"""
+  brand: String!
+
+  """Card expiration date"""
+  expirationDate: String!
+
+  """Card fingerprint"""
+  fingerprint: String!
+
+  """Card first 6 digits"""
+  firstDigits: String!
+
+  """Card holder name"""
+  holderName: String!
+
+  """Card last 4 digits"""
+  lastDigits: String!
+
+  """Card ID at Pagarme"""
+  pagarmeId: String!
+
+  """Card is valid if it is not expired"""
+  valid: Boolean!
 }
 
 input CreateCommunityInput {
@@ -389,6 +456,9 @@ type MediasResponse {
 }
 
 type Mutation {
+  """Creates a new card for a given user"""
+  createCard(data: CreateCardInput!): Card!
+
   """Users can create a community"""
   createCommunity(communityData: CreateCommunityInput!): CommunityResponse!
   createPost(communitySlug: String!, data: CreatePostInput!): PostResponse!
@@ -425,6 +495,12 @@ type Mutation {
 
 """Mongo object id scalar type"""
 scalar ObjectId
+
+type PaginatedCards {
+  cards: [Card!]!
+  hasMore: Boolean!
+  next: String
+}
 
 type PaginatedPosts {
   hasMore: Boolean!
@@ -543,6 +619,9 @@ enum PostStatus {
 type Query {
   """Queries all posts in database"""
   allPosts(postOptions: PostOptionsInput): PostsResponse!
+
+  """Lists all cards, given filters"""
+  cards(cursor: String, limit: Int!, userId: String): PaginatedCards!
   communities: CommunitiesResponse!
   community(slug: String!): CommunityResponse!
 

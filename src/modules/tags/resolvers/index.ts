@@ -462,6 +462,7 @@ export default class TagResolver {
     const allFilters = options && getPostOptions(options);
 
     if (allFilters) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { tags, ...newFilters } = allFilters;
 
       filters = newFilters;
@@ -509,6 +510,7 @@ export default class TagResolver {
     const allFilters = options && getPostOptions(options);
 
     if (allFilters) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { tags, ...newFilters } = allFilters;
 
       filters = newFilters;

@@ -1,21 +1,21 @@
 import { createTestClient } from 'apollo-server-testing';
 import { createUser } from '../../../test/createRows';
-import { cleanDB, connectToDB, disconnectDB } from '../../../test/testDb';
-import getTestServer from '../../../test/testRun';
+import getTestServer, {
+  clearDbAndRestartCounters,
+  connectMongoose,
+  disconnectMongoose,
+} from '../../../test/testRun';
 import { DocumentIdType } from '../IUser';
-// import { IUser } from '../IUser';
 
 const gql = String.raw;
 
-// let user: IUser;
-
 const email = 'johndoe@example.com';
 
-beforeAll(connectToDB);
+beforeAll(connectMongoose);
 
-beforeEach(cleanDB);
+beforeEach(clearDbAndRestartCounters);
 
-afterAll(disconnectDB);
+afterAll(disconnectMongoose);
 
 describe('an attempt to update an user info', () => {
   const mutation = gql`
