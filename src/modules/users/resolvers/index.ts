@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongodb';
 import {
   Arg,
   Mutation,
@@ -9,7 +8,6 @@ import {
   Ctx,
 } from 'type-graphql';
 import { hash, verify } from 'argon2';
-import ObjectIdScalar from '../../../type-graphql/ObjectIdScalar';
 import EditMeInput from '../inputs/EditMeInput';
 import { IUser } from '../IUser';
 import UserModel from '../UserModel';
@@ -225,7 +223,7 @@ export default class UserResolver {
 
   @Mutation(() => UserResponse, { nullable: true })
   async updateUser(
-    @Arg('_id', () => ObjectIdScalar) _id: ObjectId,
+    @Arg('userId', () => String) userId: string,
     @Arg('updateData', () => EditMeInput)
     {
       name,
@@ -255,7 +253,7 @@ export default class UserResolver {
 
     const user = await UserModel.findOneAndUpdate(
       {
-        _id,
+        _id: userId,
       },
       { ...newData },
       {

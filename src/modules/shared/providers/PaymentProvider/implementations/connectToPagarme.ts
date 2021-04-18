@@ -6,7 +6,7 @@ export async function connectToPagarMe(): Promise<typeof pagarme.client> {
 
   try {
     client = await pagarme.client.connect({
-      api_key: 'ak_test_hb9VtvBUDspU35cOKytOH1v3gtfJkt',
+      api_key: process.env.PAGARME_APIKEY,
     });
   } catch (err) {
     handleErrorPagarme(err);

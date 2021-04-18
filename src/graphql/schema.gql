@@ -208,18 +208,18 @@ input CreatePersonalDocumentInput {
   number: String!
 
   """Document id type, excluding company documents"""
-  type: String!
+  type: DocumentIdType!
 }
 
 input CreatePhoneInput {
+  """Phone number regional code (DDD), if existent"""
+  areaCode: String
+
   """Phone number country code"""
   countryCode: String!
 
   """Phone number"""
   phone: String!
-
-  """Phone number regional code (DDD), if existent"""
-  regionalCode: String
 }
 
 input CreatePostInput {
@@ -274,6 +274,18 @@ input CreateTagInput {
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
 scalar DateTime
+
+"""Acceptable documents for using the platform"""
+enum DocumentIdType {
+  """"""
+  CNPJ
+
+  """"""
+  CPF
+
+  """"""
+  PASSPORT
+}
 
 input EditMeInput {
   """User address"""
@@ -484,7 +496,7 @@ type Mutation {
   updatePostMainMedia(communityId: String!, mainMediaData: UpdateMediaInput!, postId: String!): PostResponse!
   updateRole(id: String!, updateData: UpdateRoleInput!): RoleResponse
   updateTag(communitySlug: String!, id: String!, updateData: UpdateTagInput!): TagResponse
-  updateUser(_id: ObjectId!, updateData: EditMeInput!): UserResponse
+  updateUser(updateData: EditMeInput!, userId: String!): UserResponse
 
   """Users can import a media"""
   uploadImage(communitySlug: String!, imageData: UploadImageInput!): MediaResponse!
@@ -523,14 +535,14 @@ type PersonalDocument {
 
 """Phone Info Model"""
 type Phone {
+  """Phone number regional code (DDD), if existent"""
+  areaCode: String
+
   """Phone number country code"""
   countryCode: String!
 
   """Phone number"""
   phone: String!
-
-  """Phone number regional code (DDD), if existent"""
-  regionalCode: String
 }
 
 """The Posts model"""

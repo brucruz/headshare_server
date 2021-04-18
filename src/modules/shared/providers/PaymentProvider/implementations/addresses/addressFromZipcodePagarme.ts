@@ -1,5 +1,5 @@
 import { PagarmeError } from '../../dtos/PagarmeError';
-import { PagarmeZipcodeResponse } from '../../dtos/PagarmeTransfer';
+import { PagarmeZipcodeResponse } from '../../dtos/PagarmeZipcodeResponse';
 import { connectToPagarMe } from '../connectToPagarme';
 import { handleErrorPagarme } from '../handleErrorPagarme';
 

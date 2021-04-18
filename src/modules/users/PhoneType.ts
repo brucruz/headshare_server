@@ -9,7 +9,7 @@ export default class Phone {
     description: 'Phone number regional code (DDD), if existent',
     nullable: true,
   })
-  regionalCode?: string;
+  areaCode?: string;
 
   @Field(() => String, { description: 'Phone number' })
   phone: string;

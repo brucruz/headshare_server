@@ -50,7 +50,7 @@ const Schema = new mongoose.Schema(
     ],
     phone: {
       countryCode: { type: String },
-      regionalCode: { type: String },
+      areaCode: { type: String },
       phone: { type: String },
     },
     birthday: {

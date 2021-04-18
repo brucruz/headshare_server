@@ -19,8 +19,8 @@ afterAll(disconnectMongoose);
 
 describe('an attempt to update an user info', () => {
   const mutation = gql`
-    mutation M($_id: ObjectId!, $updateData: EditMeInput!) {
-      updateUser(_id: $_id, updateData: $updateData) {
+    mutation M($userId: String!, $updateData: EditMeInput!) {
+      updateUser(userId: $userId, updateData: $updateData) {
         user {
           name
           surname
@@ -41,7 +41,7 @@ describe('an attempt to update an user info', () => {
           }
           phone {
             countryCode
-            regionalCode
+            areaCode
             phone
           }
           birthday
@@ -57,8 +57,14 @@ describe('an attempt to update an user info', () => {
   it('should update an user', async () => {
     const user = await createUser({ email });
 
+    console.log('typeof user id (in test): ', typeof user._id);
+    console.log(
+      'typeof user id toString (in test): ',
+      typeof user._id.toString(),
+    );
+
     const variables = {
-      _id: user._id.toString(),
+      userId: user._id.toString(),
       updateData: {
         name: 'Jane',
         surname: 'Doe',
@@ -76,13 +82,13 @@ describe('an attempt to update an user info', () => {
         },
         documents: [
           {
-            type: DocumentIdType.CNPJ,
+            type: DocumentIdType.CPF,
             number: '01234567898',
           },
         ],
         phone: {
           countryCode: '55',
-          regionalCode: '11',
+          areaCode: '11',
           phone: '912345678',
         },
         birthday: new Date(1980, 1, 1).toISOString(),
@@ -103,7 +109,7 @@ describe('an attempt to update an user info', () => {
 
   it('should not update an non-existent user', async () => {
     const variables = {
-      _id: '123456789012345678901234', // non-existent-id
+      userId: '123456789012345678901234', // non-existent-id
       updateData: {
         name: 'Jane',
         surname: 'Doe',

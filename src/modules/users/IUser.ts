@@ -16,29 +16,36 @@ export interface IAddress {
 
 export interface IPhone {
   countryCode: string;
-  regionalCode?: string;
+  areaCode?: string;
   phone: string;
 }
 
 // eslint-disable-next-line no-shadow
 export enum DocumentIdType {
-  CPF = 'cpf',
-  PASSPORT = 'passport',
-  CNPJ = 'cnpj',
+  CPF = 'CPF',
+  PASSPORT = 'PASSPORT',
+  CNPJ = 'CNPJ',
 }
 
 registerEnumType(DocumentIdType, {
   name: 'DocumentIdType',
   description: 'Acceptable documents for using the platform',
   valuesConfig: {
-    CPF: {},
-    PASSPORT: {},
-    CNPJ: {},
+    CPF: {
+      description: '',
+    },
+    PASSPORT: {
+      description: '',
+    },
+    CNPJ: {
+      description: '',
+    },
   },
 });
 
 export interface IPersonalDocument {
-  type: Exclude<DocumentIdType, DocumentIdType.CNPJ>;
+  // type: Exclude<DocumentIdType, DocumentIdType.CNPJ>;
+  type: DocumentIdType;
   number: string;
 }
 

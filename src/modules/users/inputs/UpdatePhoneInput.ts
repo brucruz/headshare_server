@@ -12,7 +12,7 @@ export default class UpdatePhoneInput {
     description: 'Phone number regional code (DDD), if existent',
     nullable: true,
   })
-  regionalCode?: string;
+  areaCode?: string;
 
   @Field(() => String, { description: 'Phone number', nullable: true })
   phone?: string;

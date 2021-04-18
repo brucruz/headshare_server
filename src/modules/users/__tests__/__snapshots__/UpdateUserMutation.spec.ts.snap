@@ -20,14 +20,14 @@ Object {
       "documents": Array [
         Object {
           "number": "01234567898",
-          "type": "cnpj",
+          "type": "CPF",
         },
       ],
       "name": "Jane",
       "phone": Object {
+        "areaCode": "11",
         "countryCode": "55",
         "phone": "912345678",
-        "regionalCode": "11",
       },
       "surname": "Doe",
     },
