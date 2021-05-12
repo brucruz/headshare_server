@@ -30,6 +30,9 @@ const Schema = new mongoose.Schema(
     description: {
       type: String,
     },
+    stripeAccountId: {
+      type: String,
+    },
     avatar: {
       type: ObjectId,
       ref: 'medias',

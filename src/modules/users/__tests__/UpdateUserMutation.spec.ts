@@ -57,12 +57,6 @@ describe('an attempt to update an user info', () => {
   it('should update an user', async () => {
     const user = await createUser({ email });
 
-    console.log('typeof user id (in test): ', typeof user._id);
-    console.log(
-      'typeof user id toString (in test): ',
-      typeof user._id.toString(),
-    );
-
     const variables = {
       userId: user._id.toString(),
       updateData: {

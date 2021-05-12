@@ -15,6 +15,7 @@ export default interface ICommunity extends Document {
   slug: string;
   tagline?: string;
   description?: string;
+  stripeAccountId?: string;
   avatar?: Media;
   banner?: Media;
   posts: PaginatedPosts;

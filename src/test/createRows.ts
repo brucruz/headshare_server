@@ -4,6 +4,11 @@ import { hash } from 'argon2';
 import CardModel from '../modules/cards/CardModel';
 import { ICard } from '../modules/cards/ICard';
 import CreateCardInput from '../modules/cards/inputs/CreateCardInput';
+import CommunityModel from '../modules/communities/CommunityModel';
+import ICommunity from '../modules/communities/ICommunity';
+import CreateCommunityInput from '../modules/communities/resolvers/input/CreateCommunityInput';
+import { RoleOptions } from '../modules/roles/IRole';
+import RoleModel from '../modules/roles/RoleModel';
 import RegisterUserInput from '../modules/users/inputs/RegisterUserInput';
 import { IUser } from '../modules/users/IUser';
 import UserModel from '../modules/users/UserModel';
@@ -47,6 +52,29 @@ export const createUser = async (
   }).save();
 
   return user;
+};
+
+export const createCommunity = async (
+  args: DeepPartial<CreateCommunityInput> = {},
+  creator: string,
+): Promise<ICommunity> => {
+  const { title, slug, ...rest } = args;
+
+  const n = (global.__COUNTERS__.community += 1);
+
+  const community = await new CommunityModel({
+    title: title || `Community #${n}`,
+    slug: slug || `community-${n}`,
+    ...rest,
+  }).save();
+
+  await new RoleModel({
+    community: community._id,
+    role: RoleOptions.CREATOR,
+    user: creator,
+  }).save();
+
+  return community;
 };
 
 export const createCard = async (

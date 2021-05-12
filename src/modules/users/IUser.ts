@@ -55,6 +55,7 @@ export interface IUser extends Document {
   password?: string;
   email: string;
   avatar?: string;
+  stripeCustomerId?: string;
   address?: IAddress;
   documents: IPersonalDocument[];
   phone?: IPhone;

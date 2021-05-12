@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`an user should be able to create a community 1`] = `
+Object {
+  "createCommunity": Object {
+    "community": Object {
+      "creator": Object {
+        "name": "John",
+      },
+      "slug": "test",
+      "title": "Test community",
+    },
+    "errors": null,
+  },
+}
+`;
+
+exports[`an user should not be able to create community if not logged 1`] = `
+Object {
+  "createCommunity": Object {
+    "community": null,
+    "errors": Array [
+      Object {
+        "field": "userId",
+        "message": "You must be logged in to perform this action",
+      },
+    ],
+  },
+}
+`;

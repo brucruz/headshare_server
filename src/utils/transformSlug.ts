@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 export default function transformSlug(input: string): string {
   const output = input
     .toString()

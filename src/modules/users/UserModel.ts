@@ -32,6 +32,9 @@ const Schema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    stripeCustomerId: {
+      type: String,
+    },
     address: {
       street: { type: String, trim: true },
       number: { type: String, trim: true },

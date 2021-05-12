@@ -1,3 +1,9 @@
+import {
+  AuthenticationError,
+  ForbiddenError,
+  UserInputError,
+  ValidationError,
+} from 'apollo-server-errors';
 import { ObjectId } from 'mongodb';
 import {
   Resolver,
@@ -10,6 +16,7 @@ import {
   Int,
 } from 'type-graphql';
 import { ApolloContext } from '../../../apollo-server/ApolloContext';
+import { appWebUrl } from '../../../constants';
 import IMedia from '../../medias/IMedia';
 import MediaModel from '../../medias/MediaModel';
 import PostModel from '../../posts/PostModel';
@@ -17,6 +24,7 @@ import PaginatedPosts from '../../posts/resolvers/PaginatedPosts';
 import IRole, { RoleOptions } from '../../roles/IRole';
 import RoleModel from '../../roles/RoleModel';
 import Role from '../../roles/RoleType';
+import { stripe } from '../../shared/providers/PaymentProvider/implementations/StripeProvider';
 import ITag from '../../tags/ITag';
 import TagModel from '../../tags/TagModel';
 import Tag from '../../tags/TagType';
@@ -26,7 +34,7 @@ import User from '../../users/UserType';
 import CommunityModel from '../CommunityModel';
 import Community from '../CommunityType';
 import HighlightedTag from '../HighlightTagType';
-import { IHighlightedTag } from '../ICommunity';
+import ICommunity, { IHighlightedTag } from '../ICommunity';
 import CommunitiesResponse from './CommunitiesResponse';
 import CommunityResponse from './CommunityResponse';
 import CreateCommunityInput from './input/CreateCommunityInput';
@@ -94,6 +102,12 @@ export default class CommunityResolver {
       tagline,
       description,
     });
+
+    const account = await stripe.accounts.create({
+      type: 'standard',
+    });
+
+    community.stripeAccountId = account.id;
 
     await community.save();
 
@@ -265,6 +279,91 @@ export default class CommunityResolver {
     return { community };
   }
 
+  @Mutation(() => Community)
+  async createStripeAccount(
+    @Arg('communityId', () => String) communityId: string,
+    @Ctx() { req }: ApolloContext,
+  ): Promise<ICommunity> {
+    const { userId } = req.session;
+
+    if (!userId) {
+      throw new AuthenticationError(
+        'You must be connected to create a Stripe account',
+      );
+    }
+
+    const community = await CommunityModel.findById(communityId);
+
+    if (!community) {
+      throw new UserInputError('You must provide a valid community Id', {
+        field: 'communityId',
+      });
+    }
+
+    const isCreator = await RoleModel.isCreator(userId, communityId);
+
+    if (!isCreator) {
+      throw new ForbiddenError(
+        'You must be this community creator to create a Stripe account',
+      );
+    }
+
+    const account = await stripe.accounts.create({
+      type: 'standard',
+    });
+
+    community.stripeAccountId = account.id;
+
+    await community.save();
+
+    return community;
+  }
+
+  @Mutation(() => String)
+  async createStripeAccountLink(
+    @Arg('communityId', () => String) communityId: string,
+    @Ctx() { req }: ApolloContext,
+  ): Promise<string> {
+    const { userId } = req.session;
+
+    if (!userId) {
+      throw new AuthenticationError(
+        'You must be connected to create a Stripe account',
+      );
+    }
+
+    const community = await CommunityModel.findById(communityId);
+
+    if (!community) {
+      throw new UserInputError('You must provide a valid community Id', {
+        field: 'communityId',
+      });
+    }
+
+    const isCreator = await RoleModel.isCreator(userId, communityId);
+
+    if (!isCreator) {
+      throw new ForbiddenError(
+        'You must be this community creator to create a Stripe account',
+      );
+    }
+
+    if (!community.stripeAccountId) {
+      throw new ValidationError(
+        'This community does not have a associated Stripe Account yet',
+      );
+    }
+
+    const accountLink = await stripe.accountLinks.create({
+      account: community.stripeAccountId,
+      refresh_url: `${appWebUrl}/${community.slug}/admin/config/payments`,
+      return_url: `${appWebUrl}/${community.slug}/admin/config/payments`,
+      type: 'account_onboarding',
+    });
+
+    return accountLink.url;
+  }
+
   @FieldResolver(() => PaginatedPosts)
   async posts(
     @Root() community: Community,
@@ -337,6 +436,7 @@ export default class CommunityResolver {
   ): Promise<IHighlightedTag[]> {
     const highlightedTagsObject: Promise<
       {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         tag: any;
         order: number;
       }[]
@@ -363,6 +463,7 @@ export default class CommunityResolver {
 
     const orderedHighlightedTags = highlightedTagsObjectResolved
       .flat()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .sort((a: any, b: any) => a.order - b.order);
 
     return orderedHighlightedTags;

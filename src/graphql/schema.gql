@@ -116,6 +116,9 @@ type Community {
   """Community slug to use on url"""
   slug: String!
 
+  """Stripe connected account ID"""
+  stripeAccountId: String
+
   """Community tagline"""
   tagline: String
 
@@ -475,6 +478,8 @@ type Mutation {
   createCommunity(communityData: CreateCommunityInput!): CommunityResponse!
   createPost(communitySlug: String!, data: CreatePostInput!): PostResponse!
   createRole(data: CreateRoleInput!): SuccessResponse!
+  createStripeAccount(communityId: String!): Community!
+  createStripeAccountLink(communityId: String!): String!
   createTag(communitySlug: String!, data: CreateTagInput!): TagResponse!
 
   """Owners may """
@@ -609,11 +614,6 @@ type PostResponse {
   post: Post
 }
 
-type PostsResponse {
-  errors: [ErrorResponse!]
-  paginatedPosts: PaginatedPosts
-}
-
 """The possible status a post might have"""
 enum PostStatus {
   """A post while is being written and visible only its creator"""
@@ -626,6 +626,11 @@ enum PostStatus {
 
   """A post scheduled to be submited in a future date and hour"""
   SCHEDULED
+}
+
+type PostsResponse {
+  errors: [ErrorResponse!]
+  paginatedPosts: PaginatedPosts
 }
 
 type Query {
@@ -966,6 +971,9 @@ type User {
   posts: [Post!]!
   removedAt: DateTime
   roles: [Role!]!
+
+  """Stripe customer Id"""
+  stripeCustomerId: String
 
   """User surname"""
   surname: String

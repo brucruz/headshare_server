@@ -32,6 +32,12 @@ export default class User {
   })
   avatar?: string;
 
+  @Field(() => String, {
+    description: 'Stripe customer Id',
+    nullable: true,
+  })
+  stripeCustomerId?: string;
+
   @Field(() => Address, { description: 'User address', nullable: true })
   address?: Address;
 

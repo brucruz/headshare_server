@@ -25,6 +25,7 @@ import Role from '../../roles/RoleType';
 import IRole from '../../roles/IRole';
 import RoleModel from '../../roles/RoleModel';
 import { COOKIE_NAME } from '../../../constants';
+import { stripe } from '../../shared/providers/PaymentProvider/implementations/StripeProvider';
 
 @Resolver(() => User)
 export default class UserResolver {
@@ -134,14 +135,19 @@ export default class UserResolver {
     }
 
     let user = {} as IUser;
-    // let token = '';
 
     try {
+      const stripeCustomer = await stripe.customers.create({
+        name: `${name} ${surname}`,
+        email,
+      });
+
       user = new UserModel({
         name,
         surname,
         email: email.toLowerCase(),
         password: await hash(password),
+        stripeCustomerId: stripeCustomer.id,
       });
 
       await user.save();

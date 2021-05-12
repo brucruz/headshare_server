@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`an user should not be able to create community stripe account link if not community creator 1`] = `
+Array [
+  [GraphQLError: You must be this community creator to create a Stripe account],
+]
+`;
+
+exports[`an user should not be able to create community stripe account link if not logged 1`] = `
+Array [
+  [GraphQLError: You must be connected to create a Stripe account],
+]
+`;
+
+exports[`an user should not be able to create community stripe account link if providing a non-existent communityId 1`] = `
+Array [
+  [GraphQLError: You must provide a valid community Id],
+]
+`;
+
+exports[`an user should not be able to create community stripe account link if providing the community does not have a stripe account yet 1`] = `
+Array [
+  [GraphQLError: This community does not have a associated Stripe Account yet],
+]
+`;
