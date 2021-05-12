@@ -71,7 +71,7 @@ export const createCommunity = async (
   await new RoleModel({
     community: community._id,
     role: RoleOptions.CREATOR,
-    user: creator,
+    user: creator.toString(),
   }).save();
 
   return community;

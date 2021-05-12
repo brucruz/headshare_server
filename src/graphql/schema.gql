@@ -251,6 +251,20 @@ input CreatePostInput {
   title: String
 }
 
+input CreateProductInput {
+  """CommunityId to which this product will be attached to"""
+  communityId: String!
+
+  """A community product description"""
+  description: String
+
+  """A community product name"""
+  name: String!
+
+  """Mini-description shown on membership credit card invoice"""
+  statementDescriptor: String
+}
+
 input CreateRoleInput {
   """Community of which the role is about"""
   communityId: String!
@@ -477,6 +491,7 @@ type Mutation {
   """Users can create a community"""
   createCommunity(communityData: CreateCommunityInput!): CommunityResponse!
   createPost(communitySlug: String!, data: CreatePostInput!): PostResponse!
+  createProduct(productData: CreateProductInput!): Product!
   createRole(data: CreateRoleInput!): SuccessResponse!
   createStripeAccount(communityId: String!): Community!
   createStripeAccountLink(communityId: String!): String!
@@ -631,6 +646,48 @@ enum PostStatus {
 type PostsResponse {
   errors: [ErrorResponse!]
   paginatedPosts: PaginatedPosts
+}
+
+"""The Products model"""
+type Product {
+  _id: ObjectId!
+
+  """
+  Owner selected tags to appear on community home, given a specific order
+  """
+  benefits: [ProductBenefit!]!
+
+  """Community which is the owner of this product"""
+  community: Community!
+
+  """Community creation date"""
+  createdAt: DateTime!
+
+  """A community product description"""
+  description: String
+  isActive: Boolean!
+
+  """A community product name"""
+  name: String!
+  removedAt: DateTime
+
+  """Mini-description shown on membership credit card invoice"""
+  statementDescriptor: String
+
+  """Stripe connected account ID"""
+  stripeProductId: String
+
+  """Community last update date"""
+  updatedAt: DateTime
+}
+
+"""Community product benefit model"""
+type ProductBenefit {
+  """The community product description"""
+  description: String!
+
+  """The order of the community product description"""
+  order: Int!
 }
 
 type Query {

@@ -10,6 +10,7 @@ import TagResolver from '../modules/tags/resolvers';
 import RoleResolver from '../modules/roles/resolvers';
 import MediaResolver from '../modules/medias/resolvers';
 import CardResolver from '../modules/cards/resolvers';
+import ProductResolver from '../modules/products/resolvers';
 
 const { ObjectId } = mongoose.Schema.Types;
 
@@ -22,6 +23,7 @@ const schema = buildSchema({
     RoleResolver,
     MediaResolver,
     CardResolver,
+    ProductResolver,
   ],
   emitSchemaFile: path.resolve(__dirname, 'schema.gql'),
   // dateScalarMode: 'isoDate',
