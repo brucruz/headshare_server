@@ -251,6 +251,31 @@ input CreatePostInput {
   title: String
 }
 
+input CreatePriceInput {
+  """The amount billed per invoice to the customer"""
+  amount: Int!
+
+  """A product price currency"""
+  currency: String!
+
+  """A product price nickname"""
+  nickname: String
+
+  """The possible diferent periods a recurring price might take"""
+  recurringInterval: RecurringInterval
+
+  """The number of recurring intervals to aply to each invoice"""
+  recurringIntervalCount: Int
+
+  """The number of days before charging the customer"""
+  trialDays: Int
+
+  """
+  Especifies if the customer has to pay once or repeately to mantain access to the product
+  """
+  type: PriceType!
+}
+
 input CreateProductInput {
   """A community product description"""
   description: String
@@ -488,6 +513,7 @@ type Mutation {
   """Users can create a community"""
   createCommunity(communityData: CreateCommunityInput!): CommunityResponse!
   createPost(communitySlug: String!, data: CreatePostInput!): PostResponse!
+  createPrice(communityId: String!, priceData: CreatePriceInput!, productId: String!): Price!
   createProduct(communityId: String!, productData: CreateProductInput!): Product!
   createRole(data: CreateRoleInput!): SuccessResponse!
   createStripeAccount(communityId: String!): Community!
@@ -647,6 +673,56 @@ type PostsResponse {
 }
 
 """The Products model"""
+type Price {
+  _id: ObjectId!
+
+  """The amount billed per invoice to the customer"""
+  amount: Int!
+
+  """Community creation date"""
+  createdAt: DateTime!
+
+  """A product price currency"""
+  currency: String!
+  isActive: Boolean!
+
+  """A product price nickname"""
+  nickname: String
+
+  """Product to which this price refers to"""
+  product: Product!
+
+  """The possible diferent periods a recurring price might take"""
+  recurringInterval: RecurringInterval
+
+  """The number of recurring intervals to aply to each invoice"""
+  recurringIntervalCount: Int
+  removedAt: DateTime
+
+  """Stripe price ID"""
+  stripePriceId: String!
+
+  """The number of days before charging the customer"""
+  trialDays: Int
+
+  """
+  Especifies if the customer has to pay once or repeately to mantain access to the product
+  """
+  type: PriceType!
+
+  """Community last update date"""
+  updatedAt: DateTime
+}
+
+"""
+Especifies if the customer has to pay once or repeately to mantain access to the product
+"""
+enum PriceType {
+  ONETIME
+  RECURRING
+}
+
+"""The Products model"""
 type Product {
   _id: ObjectId!
 
@@ -747,6 +823,14 @@ type Query {
 
   """Queries all users in database"""
   users: UsersResponse!
+}
+
+"""The possible diferent periods a recurring price might take"""
+enum RecurringInterval {
+  DAY
+  MONTH
+  WEEK
+  YEAR
 }
 
 input RegisterUserInput {
