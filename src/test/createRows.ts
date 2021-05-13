@@ -7,8 +7,12 @@ import CreateCardInput from '../modules/cards/inputs/CreateCardInput';
 import CommunityModel from '../modules/communities/CommunityModel';
 import ICommunity from '../modules/communities/ICommunity';
 import CreateCommunityInput from '../modules/communities/resolvers/input/CreateCommunityInput';
+import IProduct from '../modules/products/IProduct';
+import ProductModel from '../modules/products/ProductModel';
+import CreateProductInput from '../modules/products/resolvers/input/CreateProductInput';
 import { RoleOptions } from '../modules/roles/IRole';
 import RoleModel from '../modules/roles/RoleModel';
+import { stripe } from '../modules/shared/providers/PaymentProvider/implementations/StripeProvider';
 import RegisterUserInput from '../modules/users/inputs/RegisterUserInput';
 import { IUser } from '../modules/users/IUser';
 import UserModel from '../modules/users/UserModel';
@@ -26,6 +30,7 @@ export const startCounters = (): void => {
     user: 0,
     community: 0,
     post: 0,
+    product: 0,
     card: 0,
   };
 };
@@ -75,6 +80,26 @@ export const createCommunity = async (
   }).save();
 
   return community;
+};
+
+export const createProduct = async (
+  args: DeepPartial<CreateProductInput> = {},
+  communityId?: string,
+): Promise<IProduct> => {
+  const { name: receivedName, ...rest } = args;
+
+  const n = (global.__COUNTERS__.product += 1);
+
+  const name = receivedName || `Product #${n}`;
+
+  const product = await new ProductModel({
+    name,
+    stripeProductId: (await stripe.products.create({ name })).id,
+    community: communityId,
+    ...rest,
+  }).save();
+
+  return product;
 };
 
 export const createCard = async (

@@ -10,12 +10,6 @@ Object {
 }
 `;
 
-exports[`an user should be its community creator to create product for it 1`] = `
-Array [
-  [GraphQLError: You must be this community creator to create a product],
-]
-`;
-
 exports[`an user should not be able to create a product if providing a non-existent communityId 1`] = `
 Array [
   [GraphQLError: You must provide a valid community Id],
@@ -25,6 +19,12 @@ Array [
 exports[`an user should not be able to create a product if statement descriptor has more than 15 characters 1`] = `
 Array [
   [GraphQLError: Statement descriptor must have up to 15 characters],
+]
+`;
+
+exports[`an user should not be able to create product if not a community creator 1`] = `
+Array [
+  [GraphQLError: You must be this community creator to create a product],
 ]
 `;
 

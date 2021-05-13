@@ -33,9 +33,8 @@ export default class Product {
 
   @Field(() => String, {
     description: 'Stripe connected account ID',
-    nullable: true,
   })
-  stripeProductId?: string;
+  stripeProductId: string;
 
   @Field(() => Community, {
     description: 'Community which is the owner of this product',

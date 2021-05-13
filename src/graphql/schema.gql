@@ -252,9 +252,6 @@ input CreatePostInput {
 }
 
 input CreateProductInput {
-  """CommunityId to which this product will be attached to"""
-  communityId: String!
-
   """A community product description"""
   description: String
 
@@ -491,7 +488,7 @@ type Mutation {
   """Users can create a community"""
   createCommunity(communityData: CreateCommunityInput!): CommunityResponse!
   createPost(communitySlug: String!, data: CreatePostInput!): PostResponse!
-  createProduct(productData: CreateProductInput!): Product!
+  createProduct(communityId: String!, productData: CreateProductInput!): Product!
   createRole(data: CreateRoleInput!): SuccessResponse!
   createStripeAccount(communityId: String!): Community!
   createStripeAccountLink(communityId: String!): String!
@@ -514,6 +511,7 @@ type Mutation {
   """Users can upload a image directly as a post main media"""
   updatePostMainImage(communitySlug: String!, imageData: UploadImageInput!, postId: String!): PostResponse!
   updatePostMainMedia(communityId: String!, mainMediaData: UpdateMediaInput!, postId: String!): PostResponse!
+  updateProduct(communityId: String!, productData: UpdateProductInput!, productId: String!): Product!
   updateRole(id: String!, updateData: UpdateRoleInput!): RoleResponse
   updateTag(communitySlug: String!, id: String!, updateData: UpdateTagInput!): TagResponse
   updateUser(updateData: EditMeInput!, userId: String!): UserResponse
@@ -675,7 +673,7 @@ type Product {
   statementDescriptor: String
 
   """Stripe connected account ID"""
-  stripeProductId: String
+  stripeProductId: String!
 
   """Community last update date"""
   updatedAt: DateTime
@@ -688,6 +686,14 @@ type ProductBenefit {
 
   """The order of the community product description"""
   order: Int!
+}
+
+input ProductBenefitInput {
+  """A community product name"""
+  description: String!
+
+  """A community product description"""
+  order: Int
 }
 
 type Query {
@@ -939,6 +945,26 @@ input UpdatePostInput {
 
   """Post title"""
   title: String
+}
+
+input UpdateProductInput {
+  """
+  Owner selected tags to appear on community home, given a specific order
+  """
+  benefits: [ProductBenefitInput!]
+
+  """A community product description"""
+  description: String
+  isActive: Boolean
+
+  """A community product name"""
+  name: String
+
+  """Mini-description shown on membership credit card invoice"""
+  statementDescriptor: String
+
+  """Stripe connected account ID"""
+  stripeProductId: String
 }
 
 input UpdateRoleInput {

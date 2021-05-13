@@ -3,6 +3,7 @@ declare namespace NodeJS {
     user: number;
     post: number;
     community: number;
+    product: number;
     card: number;
   }
   export interface Global {

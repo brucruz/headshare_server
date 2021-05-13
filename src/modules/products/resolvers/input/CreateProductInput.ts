@@ -16,9 +16,4 @@ export default class CreateProductInput {
     nullable: true,
   })
   statementDescriptor?: string;
-
-  @Field(() => String, {
-    description: 'CommunityId to which this product will be attached to',
-  })
-  communityId: string;
 }

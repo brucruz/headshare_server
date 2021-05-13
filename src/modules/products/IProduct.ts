@@ -11,7 +11,7 @@ export default interface IProduct extends Document {
   description: string;
   benefits: ProductBenefit[];
   statementDescriptor?: string;
-  stripeProductId?: string;
+  stripeProductId: string;
   community: Community;
   isActive: boolean;
   removedAt: Date | null;
