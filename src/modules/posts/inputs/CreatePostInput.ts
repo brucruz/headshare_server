@@ -1,7 +1,6 @@
 import { ObjectId } from 'mongoose';
 import { Field, InputType } from 'type-graphql';
 import ObjectIdScalar from '../../../type-graphql/ObjectIdScalar';
-import Tag from '../../tags/TagType';
 
 @InputType()
 export default class CreatePostInput {
@@ -42,5 +41,5 @@ export default class CreatePostInput {
     description: 'Post content',
     nullable: true,
   })
-  tags?: Tag[];
+  tags?: string[];
 }

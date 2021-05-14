@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`post tags field should be able to list a post tags queried by a user 1`] = `
+Object {
+  "findPostById": Object {
+    "errors": null,
+    "post": Object {
+      "tags": Object {
+        "hasMore": false,
+        "tags": Array [
+          Object {
+            "title": "Tag #1",
+          },
+        ],
+      },
+    },
+  },
+}
+`;
+
+exports[`post tags field should be able to return empty array to a post tags queried by a user 1`] = `
+Object {
+  "findPostById": Object {
+    "errors": null,
+    "post": Object {
+      "tags": Object {
+        "hasMore": false,
+        "tags": Array [],
+      },
+    },
+  },
+}
+`;

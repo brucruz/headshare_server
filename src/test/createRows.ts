@@ -7,6 +7,9 @@ import CreateCardInput from '../modules/cards/inputs/CreateCardInput';
 import CommunityModel from '../modules/communities/CommunityModel';
 import ICommunity from '../modules/communities/ICommunity';
 import CreateCommunityInput from '../modules/communities/resolvers/input/CreateCommunityInput';
+import CreatePostInput from '../modules/posts/inputs/CreatePostInput';
+import IPost from '../modules/posts/IPost';
+import PostModel from '../modules/posts/PostModel';
 import IPrice, { PriceType } from '../modules/prices/IPrice';
 import PriceModel from '../modules/prices/PriceModel';
 import CreatePriceInput from '../modules/prices/resolvers/input/CreatePriceInput';
@@ -16,6 +19,9 @@ import CreateProductInput from '../modules/products/resolvers/input/CreateProduc
 import { RoleOptions } from '../modules/roles/IRole';
 import RoleModel from '../modules/roles/RoleModel';
 import { stripe } from '../modules/shared/providers/PaymentProvider/implementations/StripeProvider';
+import CreateTagInput from '../modules/tags/inputs/CreateTagInput';
+import ITag from '../modules/tags/ITag';
+import TagModel from '../modules/tags/TagModel';
 import RegisterUserInput from '../modules/users/inputs/RegisterUserInput';
 import { IUser } from '../modules/users/IUser';
 import UserModel from '../modules/users/UserModel';
@@ -33,6 +39,7 @@ export const startCounters = (): void => {
     user: 0,
     community: 0,
     post: 0,
+    tag: 0,
     product: 0,
     card: 0,
   };
@@ -83,6 +90,44 @@ export const createCommunity = async (
   }).save();
 
   return community;
+};
+
+export const createPost = async (
+  args: DeepPartial<CreatePostInput> = {},
+  creator: string,
+  communityId?: string,
+): Promise<IPost> => {
+  const { title, slug, ...rest } = args;
+
+  const n = (global.__COUNTERS__.post += 1);
+
+  const post = await new PostModel({
+    title: title || `Post #${n}`,
+    slug: slug || `post-${n}`,
+    community: communityId,
+    creator,
+    ...rest,
+  }).save();
+
+  return post;
+};
+
+export const createTag = async (
+  args: DeepPartial<CreateTagInput> = {},
+  communityId?: string,
+): Promise<ITag> => {
+  const { title, slug, ...rest } = args;
+
+  const n = (global.__COUNTERS__.tag += 1);
+
+  const tag = await new TagModel({
+    title: title || `Tag #${n}`,
+    slug: slug || `tag-${n}`,
+    community: communityId,
+    ...rest,
+  }).save();
+
+  return tag;
 };
 
 export const createProduct = async (
