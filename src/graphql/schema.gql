@@ -416,11 +416,6 @@ type PostResponse {
   post: Post
 }
 
-type PostsResponse {
-  errors: [ErrorResponse!]
-  paginatedPosts: PaginatedPosts
-}
-
 """The possible status a post might have"""
 enum PostStatus {
   """A post while is being written and visible only its creator"""
@@ -433,6 +428,11 @@ enum PostStatus {
 
   """A post scheduled to be submited in a future date and hour"""
   SCHEDULED
+}
+
+type PostsResponse {
+  errors: [ErrorResponse!]
+  paginatedPosts: PaginatedPosts
 }
 
 type Query {
