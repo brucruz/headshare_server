@@ -30,6 +30,34 @@ const Schema = new mongoose.Schema(
     },
     avatar_url: {
       type: String,
+      trim: true,
+    },
+    stripeCustomerId: {
+      type: String,
+    },
+    address: {
+      street: { type: String, trim: true },
+      number: { type: String, trim: true },
+      complement: { type: String, trim: true },
+      neighbourhood: { type: String, trim: true },
+      city: { type: String, trim: true },
+      zipcode: { type: String, trim: true },
+      state: { type: String, trim: true },
+      country: { type: String, trim: true },
+    },
+    documents: [
+      {
+        type: { type: String },
+        number: { type: String },
+      },
+    ],
+    phone: {
+      countryCode: { type: String },
+      areaCode: { type: String },
+      phone: { type: String },
+    },
+    birthday: {
+      type: Date,
     },
     posts: [
       {

@@ -1,0 +1,183 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`a logged user is able to list all his stored cards 1`] = `
+Object {
+  "cards": Array [
+    Object {
+      "brand": "Test",
+      "expirationDate": "1299",
+      "fingerprint": "iohnmgiigndq1ouiyb78t",
+      "firstDigits": "12341",
+      "holderName": "Normal User 1",
+      "isMain": true,
+      "lastDigits": "781",
+      "pagarmeId": "0001",
+      "user": Object {
+        "email": "user-1@example.com",
+        "name": "Normal user 1",
+      },
+      "valid": true,
+    },
+    Object {
+      "brand": "Test",
+      "expirationDate": "1299",
+      "fingerprint": "iohnmgiigndq2ouiyb78t",
+      "firstDigits": "12342",
+      "holderName": "Normal User 2",
+      "isMain": false,
+      "lastDigits": "782",
+      "pagarmeId": "0002",
+      "user": Object {
+        "email": "user-1@example.com",
+        "name": "Normal user 1",
+      },
+      "valid": true,
+    },
+  ],
+  "hasMore": false,
+  "next": null,
+}
+`;
+
+exports[`an admin user is able to list all stored cards, regardless of who created them 1`] = `
+Object {
+  "cards": Array [
+    Object {
+      "brand": "Test",
+      "expirationDate": "1299",
+      "fingerprint": "iohnmgiigndq3ouiyb78t",
+      "firstDigits": "12343",
+      "holderName": "Normal User 3",
+      "isMain": true,
+      "lastDigits": "783",
+      "pagarmeId": "0003",
+      "user": Object {
+        "email": "user-2@example.com",
+        "name": "Normal user 2",
+      },
+      "valid": true,
+    },
+    Object {
+      "brand": "Test",
+      "expirationDate": "1299",
+      "fingerprint": "iohnmgiigndq1ouiyb78t",
+      "firstDigits": "12341",
+      "holderName": "Normal User 1",
+      "isMain": true,
+      "lastDigits": "781",
+      "pagarmeId": "0001",
+      "user": Object {
+        "email": "user-1@example.com",
+        "name": "Normal user 1",
+      },
+      "valid": true,
+    },
+    Object {
+      "brand": "Test",
+      "expirationDate": "1299",
+      "fingerprint": "iohnmgiigndq4ouiyb78t",
+      "firstDigits": "12344",
+      "holderName": "Normal User 4",
+      "isMain": false,
+      "lastDigits": "784",
+      "pagarmeId": "0004",
+      "user": Object {
+        "email": "user-2@example.com",
+        "name": "Normal user 2",
+      },
+      "valid": true,
+    },
+    Object {
+      "brand": "Test",
+      "expirationDate": "1299",
+      "fingerprint": "iohnmgiigndq2ouiyb78t",
+      "firstDigits": "12342",
+      "holderName": "Normal User 2",
+      "isMain": false,
+      "lastDigits": "782",
+      "pagarmeId": "0002",
+      "user": Object {
+        "email": "user-1@example.com",
+        "name": "Normal user 1",
+      },
+      "valid": true,
+    },
+  ],
+  "hasMore": false,
+  "next": null,
+}
+`;
+
+exports[`an admin user is able to see the first page of stored cards 1`] = `
+Object {
+  "cards": Array [
+    Object {
+      "brand": "Test",
+      "expirationDate": "1299",
+      "fingerprint": "iohnmgiigndq3ouiyb78t",
+      "firstDigits": "12343",
+      "holderName": "Normal User 3",
+      "isMain": true,
+      "lastDigits": "783",
+      "pagarmeId": "0003",
+      "user": Object {
+        "email": "user-2@example.com",
+        "name": "Normal user 2",
+      },
+      "valid": true,
+    },
+    Object {
+      "brand": "Test",
+      "expirationDate": "1299",
+      "fingerprint": "iohnmgiigndq1ouiyb78t",
+      "firstDigits": "12341",
+      "holderName": "Normal User 1",
+      "isMain": true,
+      "lastDigits": "781",
+      "pagarmeId": "0001",
+      "user": Object {
+        "email": "user-1@example.com",
+        "name": "Normal user 1",
+      },
+      "valid": true,
+    },
+    Object {
+      "brand": "Test",
+      "expirationDate": "1299",
+      "fingerprint": "iohnmgiigndq4ouiyb78t",
+      "firstDigits": "12344",
+      "holderName": "Normal User 4",
+      "isMain": false,
+      "lastDigits": "784",
+      "pagarmeId": "0004",
+      "user": Object {
+        "email": "user-2@example.com",
+        "name": "Normal user 2",
+      },
+      "valid": true,
+    },
+  ],
+}
+`;
+
+exports[`an admin user is able to see the second page of stored cards 1`] = `
+Object {
+  "cards": Array [
+    Object {
+      "brand": "Test",
+      "expirationDate": "1299",
+      "fingerprint": "iohnmgiigndq1ouiyb78t",
+      "firstDigits": "12341",
+      "holderName": "Normal User 1",
+      "isMain": true,
+      "lastDigits": "781",
+      "pagarmeId": "0001",
+      "user": Object {
+        "email": "user-1@example.com",
+        "name": "Normal user 1",
+      },
+      "valid": true,
+    },
+  ],
+}
+`;

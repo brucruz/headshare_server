@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`an attempt to update an user info should update an user 1`] = `
+Object {
+  "updateUser": Object {
+    "errors": null,
+    "user": Object {
+      "address": Object {
+        "city": "Testopolis",
+        "complement": "Apartment 11",
+        "country": "Testland",
+        "neighbourhood": "Test Area",
+        "number": "10",
+        "state": "Test DC",
+        "street": "Test St.",
+        "zipcode": "00000000",
+      },
+      "avatar": null,
+      "birthday": "1980-02-01T03:00:00.000Z",
+      "documents": CoreDocumentArray [
+        Object {
+          "number": "01234567898",
+          "type": "CPF",
+        },
+      ],
+      "name": "Jane",
+      "phone": Object {
+        "areaCode": "11",
+        "countryCode": "55",
+        "phone": "912345678",
+      },
+      "surname": "Doe",
+    },
+  },
+}
+`;

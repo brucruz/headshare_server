@@ -1,28 +1,50 @@
 import { createTestClient } from 'apollo-server-testing';
 import { createUser } from '../../../test/createRows';
-import { cleanDB, connectToDB, disconnectDB } from '../../../test/testDb';
-import getTestServer from '../../../test/testRun';
-// import { IUser } from '../IUser';
+import getTestServer, {
+  clearDbAndRestartCounters,
+  connectMongoose,
+  disconnectMongoose,
+} from '../../../test/testRun';
+import { DocumentIdType } from '../IUser';
 
 const gql = String.raw;
 
-// let user: IUser;
-
 const email = 'johndoe@example.com';
 
-beforeAll(connectToDB);
+beforeAll(connectMongoose);
 
-beforeEach(cleanDB);
+beforeEach(clearDbAndRestartCounters);
 
-afterAll(disconnectDB);
+afterAll(disconnectMongoose);
 
 describe('an attempt to update an user info', () => {
   const mutation = gql`
-    mutation M($_id: ObjectId!, $updateData: EditMeInput!) {
-      updateUser(_id: $_id, updateData: $updateData) {
+    mutation M($userId: String!, $updateData: EditMeInput!) {
+      updateUser(userId: $userId, updateData: $updateData) {
         user {
           name
           surname
+          avatar
+          address {
+            street
+            number
+            complement
+            neighbourhood
+            city
+            zipcode
+            state
+            country
+          }
+          documents {
+            type
+            number
+          }
+          phone {
+            countryCode
+            areaCode
+            phone
+          }
+          birthday
         }
         errors {
           field
@@ -36,10 +58,34 @@ describe('an attempt to update an user info', () => {
     const user = await createUser({ email });
 
     const variables = {
-      _id: user._id.toString(),
+      userId: user._id.toString(),
       updateData: {
         name: 'Jane',
         surname: 'Doe',
+        password: '654321',
+        avatar: 'avatar-url',
+        address: {
+          street: 'Test St.',
+          number: '10',
+          complement: 'Apartment 11',
+          neighbourhood: 'Test Area',
+          city: 'Testopolis',
+          zipcode: '00000000',
+          state: 'Test DC',
+          country: 'Testland',
+        },
+        documents: [
+          {
+            type: DocumentIdType.CPF,
+            number: '01234567898',
+          },
+        ],
+        phone: {
+          countryCode: '55',
+          areaCode: '11',
+          phone: '912345678',
+        },
+        birthday: new Date(1980, 1, 1).toISOString(),
       },
     };
 
@@ -52,17 +98,12 @@ describe('an attempt to update an user info', () => {
     });
 
     expect(result.errors).toBeFalsy();
-    expect(JSON.stringify(result.data?.updateUser.user.name)).toEqual(
-      JSON.stringify('Jane'),
-    );
-    expect(JSON.stringify(result.data?.updateUser.user.surname)).toEqual(
-      JSON.stringify('Doe'),
-    );
+    expect(result.data).toMatchSnapshot();
   });
 
   it('should not update an non-existent user', async () => {
     const variables = {
-      _id: '123456789012345678901234', // non-existent-id
+      userId: '123456789012345678901234', // non-existent-id
       updateData: {
         name: 'Jane',
         surname: 'Doe',

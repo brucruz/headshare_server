@@ -29,6 +29,12 @@ export default class Community {
   @Field(() => String, { description: 'Community description', nullable: true })
   description?: string;
 
+  @Field(() => String, {
+    description: 'Stripe connected account ID',
+    nullable: true,
+  })
+  stripeAccountId?: string;
+
   @Field(() => Media, {
     description: 'Community avatar used to visually identify community info',
     nullable: true,
@@ -71,6 +77,7 @@ export default class Community {
   })
   membersCount: number;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _doc?: any;
 
   @Field(() => Boolean)

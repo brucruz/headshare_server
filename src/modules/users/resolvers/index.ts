@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongodb';
 import {
   Arg,
   Mutation,
@@ -9,7 +8,6 @@ import {
   Ctx,
 } from 'type-graphql';
 import { hash, verify } from 'argon2';
-import ObjectIdScalar from '../../../type-graphql/ObjectIdScalar';
 import EditMeInput from '../inputs/EditMeInput';
 import { IUser } from '../IUser';
 import UserModel from '../UserModel';
@@ -27,6 +25,7 @@ import Role from '../../roles/RoleType';
 import IRole from '../../roles/IRole';
 import RoleModel from '../../roles/RoleModel';
 import { COOKIE_NAME } from '../../../constants';
+import { stripe } from '../../shared/providers/PaymentProvider/implementations/StripeProvider';
 
 @Resolver(() => User)
 export default class UserResolver {
@@ -136,14 +135,19 @@ export default class UserResolver {
     }
 
     let user = {} as IUser;
-    // let token = '';
 
     try {
+      const stripeCustomer = await stripe.customers.create({
+        name: `${name} ${surname}`,
+        email,
+      });
+
       user = new UserModel({
         name,
         surname,
         email: email.toLowerCase(),
         password: await hash(password),
+        stripeCustomerId: stripeCustomer.id,
       });
 
       await user.save();
@@ -225,9 +229,19 @@ export default class UserResolver {
 
   @Mutation(() => UserResponse, { nullable: true })
   async updateUser(
-    @Arg('_id', () => ObjectIdScalar) _id: ObjectId,
+    @Arg('userId', () => String) userId: string,
     @Arg('updateData', () => EditMeInput)
-    { name, surname, email, password, avatar }: EditMeInput,
+    {
+      name,
+      surname,
+      email,
+      password,
+      avatar,
+      address,
+      documents,
+      phone,
+      birthday,
+    }: EditMeInput,
   ): Promise<UserResponse> {
     const newData = {
       $set: {
@@ -236,12 +250,16 @@ export default class UserResolver {
         ...(email ? { email } : {}),
         ...(password ? { password: await hash(password) } : {}),
         ...(avatar ? { avatar } : {}),
+        ...(address ? { address } : {}),
+        ...(documents ? { documents } : {}),
+        ...(phone ? { phone } : {}),
+        ...(birthday ? { birthday } : {}),
       },
     };
 
     const user = await UserModel.findOneAndUpdate(
       {
-        _id,
+        _id: userId,
       },
       { ...newData },
       {

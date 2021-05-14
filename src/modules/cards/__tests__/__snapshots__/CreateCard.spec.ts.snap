@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`a visitor attempting to store a user card is able to store a card 1`] = `
+Object {
+  "createCard": Object {
+    "brand": "Mastercard",
+    "expirationDate": "0122",
+    "fingerprint": "1234567890",
+    "firstDigits": "123456",
+    "holderName": "Teste",
+    "isMain": true,
+    "lastDigits": "7890",
+    "pagarmeId": "001",
+    "user": Object {
+      "email": "user-1@example.com",
+      "name": "Normal user 1",
+    },
+    "valid": true,
+  },
+}
+`;

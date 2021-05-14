@@ -23,6 +23,7 @@ export const connectToDB = async (): Promise<typeof mongoose> => {
   return connection;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 export const disconnectDB = (cb = () => {}) => {
   mongoose.disconnect(cb);
 };

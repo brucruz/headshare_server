@@ -1,15 +1,18 @@
 import { createTestClient } from 'apollo-server-testing';
 import { createUser } from '../../../test/createRows';
-import { cleanDB, connectToDB, disconnectDB } from '../../../test/testDb';
-import getTestServer from '../../../test/testRun';
+import getTestServer, {
+  connectMongoose,
+  disconnectMongoose,
+  clearDbAndRestartCounters,
+} from '../../../test/testRun';
 
 const gql = String.raw;
 
-beforeAll(connectToDB);
+beforeAll(connectMongoose);
 
-beforeEach(cleanDB);
+beforeEach(clearDbAndRestartCounters);
 
-afterAll(disconnectDB);
+afterAll(disconnectMongoose);
 
 describe('a visitor attempting to register as user', () => {
   const mutation = gql`

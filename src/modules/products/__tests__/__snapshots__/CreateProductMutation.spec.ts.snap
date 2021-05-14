@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`an user should be able to create a product 1`] = `
+Object {
+  "benefits": CoreDocumentArray [],
+  "description": "Product created automated by a test",
+  "isActive": false,
+  "name": "Test",
+  "statementDescriptor": "Test Product",
+}
+`;
+
+exports[`an user should not be able to create a product if providing a non-existent communityId 1`] = `
+Array [
+  [GraphQLError: You must provide a valid community Id],
+]
+`;
+
+exports[`an user should not be able to create a product if statement descriptor has more than 15 characters 1`] = `
+Array [
+  [GraphQLError: Statement descriptor must have up to 15 characters],
+]
+`;
+
+exports[`an user should not be able to create product if not a community creator 1`] = `
+Array [
+  [GraphQLError: You must be this community creator to create a product],
+]
+`;
+
+exports[`an user should not be able to create product if not logged 1`] = `
+Array [
+  [GraphQLError: You must be connected to create a product],
+]
+`;

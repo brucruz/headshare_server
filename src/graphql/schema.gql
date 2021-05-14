@@ -3,6 +3,74 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+"""Address model"""
+type Address {
+  """Address city name"""
+  city: String
+
+  """Address complementary info"""
+  complement: String
+
+  """Address country name"""
+  country: String
+
+  """Address neighbourhood"""
+  neighbourhood: String
+
+  """Street number"""
+  number: String
+
+  """Address state name"""
+  state: String
+
+  """Street name"""
+  street: String
+
+  """Address zipcode"""
+  zipcode: String
+}
+
+"""The Cards model"""
+type Card {
+  _id: ObjectId!
+
+  """Card brand"""
+  brand: String!
+
+  """Card creation date"""
+  createdAt: DateTime!
+
+  """Card expiration date"""
+  expirationDate: String!
+
+  """Card fingerprint"""
+  fingerprint: String!
+
+  """Card first 6 digits"""
+  firstDigits: String!
+
+  """Card holder name"""
+  holderName: String!
+  isActive: Boolean!
+
+  """Indicates if this card is its user main one"""
+  isMain: Boolean
+
+  """Card last 4 digits"""
+  lastDigits: String!
+
+  """Card ID at Pagarme"""
+  pagarmeId: String!
+  removedAt: DateTime
+
+  """Card last update date"""
+  updatedAt: DateTime
+  user: User!
+
+  """Card is valid if it is not expired"""
+  valid: Boolean!
+}
+
 type CommunitiesResponse {
   communities: [Community!]
   errors: [ErrorResponse!]
@@ -48,6 +116,9 @@ type Community {
   """Community slug to use on url"""
   slug: String!
 
+  """Stripe connected account ID"""
+  stripeAccountId: String
+
   """Community tagline"""
   tagline: String
 
@@ -66,6 +137,58 @@ type CommunityResponse {
   errors: [ErrorResponse!]
 }
 
+input CreateAddressInput {
+  """Address city name"""
+  city: String!
+
+  """Address complementary info"""
+  complement: String
+
+  """Address country name"""
+  country: String!
+
+  """Address neighbourhood"""
+  neighbourhood: String
+
+  """Street number"""
+  number: String!
+
+  """Address state name"""
+  state: String
+
+  """Street name"""
+  street: String!
+
+  """Address zipcode"""
+  zipcode: String!
+}
+
+input CreateCardInput {
+  """Card brand"""
+  brand: String!
+
+  """Card expiration date"""
+  expirationDate: String!
+
+  """Card fingerprint"""
+  fingerprint: String!
+
+  """Card first 6 digits"""
+  firstDigits: String!
+
+  """Card holder name"""
+  holderName: String!
+
+  """Card last 4 digits"""
+  lastDigits: String!
+
+  """Card ID at Pagarme"""
+  pagarmeId: String!
+
+  """Card is valid if it is not expired"""
+  valid: Boolean!
+}
+
 input CreateCommunityInput {
   """Community description"""
   description: String
@@ -81,6 +204,25 @@ input CreateCommunityInput {
 
   """Community title"""
   title: String!
+}
+
+input CreatePersonalDocumentInput {
+  """Document id number"""
+  number: String!
+
+  """Document id type, excluding company documents"""
+  type: DocumentIdType!
+}
+
+input CreatePhoneInput {
+  """Phone number regional code (DDD), if existent"""
+  areaCode: String
+
+  """Phone number country code"""
+  countryCode: String!
+
+  """Phone number"""
+  phone: String!
 }
 
 input CreatePostInput {
@@ -107,6 +249,42 @@ input CreatePostInput {
 
   """Post title"""
   title: String
+}
+
+input CreatePriceInput {
+  """The amount billed per invoice to the customer"""
+  amount: Int!
+
+  """A product price currency"""
+  currency: String!
+
+  """A product price nickname"""
+  nickname: String
+
+  """The possible diferent periods a recurring price might take"""
+  recurringInterval: RecurringInterval
+
+  """The number of recurring intervals to aply to each invoice"""
+  recurringIntervalCount: Int
+
+  """The number of days before charging the customer"""
+  trialDays: Int
+
+  """
+  Especifies if the customer has to pay once or repeately to mantain access to the product
+  """
+  type: PriceType!
+}
+
+input CreateProductInput {
+  """A community product description"""
+  description: String
+
+  """A community product name"""
+  name: String!
+
+  """Mini-description shown on membership credit card invoice"""
+  statementDescriptor: String
 }
 
 input CreateRoleInput {
@@ -136,9 +314,30 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 """
 scalar DateTime
 
+"""Acceptable documents for using the platform"""
+enum DocumentIdType {
+  """"""
+  CNPJ
+
+  """"""
+  CPF
+
+  """"""
+  PASSPORT
+}
+
 input EditMeInput {
+  """User address"""
+  address: CreateAddressInput
+
   """User avatar image link"""
   avatar: String
+
+  """User birthday"""
+  birthday: DateTime
+
+  """User personal documents"""
+  documents: [CreatePersonalDocumentInput!]
 
   """User email to be used on login"""
   email: String
@@ -148,6 +347,9 @@ input EditMeInput {
 
   """User password to be used on login"""
   password: String
+
+  """User phone info"""
+  phone: CreatePhoneInput
 
   """User surname"""
   surname: String
@@ -305,10 +507,17 @@ type MediasResponse {
 }
 
 type Mutation {
+  """Creates a new card for a given user"""
+  createCard(data: CreateCardInput!): Card!
+
   """Users can create a community"""
   createCommunity(communityData: CreateCommunityInput!): CommunityResponse!
   createPost(communitySlug: String!, data: CreatePostInput!): PostResponse!
+  createPrice(communityId: String!, priceData: CreatePriceInput!, productId: String!): Price!
+  createProduct(communityId: String!, productData: CreateProductInput!): Product!
   createRole(data: CreateRoleInput!): SuccessResponse!
+  createStripeAccount(communityId: String!): Community!
+  createStripeAccountLink(communityId: String!): String!
   createTag(communitySlug: String!, data: CreateTagInput!): TagResponse!
 
   """Owners may """
@@ -328,9 +537,11 @@ type Mutation {
   """Users can upload a image directly as a post main media"""
   updatePostMainImage(communitySlug: String!, imageData: UploadImageInput!, postId: String!): PostResponse!
   updatePostMainMedia(communityId: String!, mainMediaData: UpdateMediaInput!, postId: String!): PostResponse!
+  updatePrice(communityId: String!, priceData: UpdatePriceInput!, priceId: String!): Price!
+  updateProduct(communityId: String!, productData: UpdateProductInput!, productId: String!): Product!
   updateRole(id: String!, updateData: UpdateRoleInput!): RoleResponse
   updateTag(communitySlug: String!, id: String!, updateData: UpdateTagInput!): TagResponse
-  updateUser(_id: ObjectId!, updateData: EditMeInput!): UserResponse
+  updateUser(updateData: EditMeInput!, userId: String!): UserResponse
 
   """Users can import a media"""
   uploadImage(communitySlug: String!, imageData: UploadImageInput!): MediaResponse!
@@ -342,6 +553,12 @@ type Mutation {
 """Mongo object id scalar type"""
 scalar ObjectId
 
+type PaginatedCards {
+  cards: [Card!]!
+  hasMore: Boolean!
+  next: String
+}
+
 type PaginatedPosts {
   hasMore: Boolean!
   posts: [Post!]!
@@ -350,6 +567,27 @@ type PaginatedPosts {
 type PaginatedTags {
   hasMore: Boolean!
   tags: [Tag!]!
+}
+
+"""Personal Document Model"""
+type PersonalDocument {
+  """Document id number"""
+  number: String!
+
+  """Document id type, excluding company documents"""
+  type: String!
+}
+
+"""Phone Info Model"""
+type Phone {
+  """Phone number regional code (DDD), if existent"""
+  areaCode: String
+
+  """Phone number country code"""
+  countryCode: String!
+
+  """Phone number"""
+  phone: String!
 }
 
 """The Posts model"""
@@ -435,9 +673,115 @@ type PostsResponse {
   paginatedPosts: PaginatedPosts
 }
 
+"""The Products model"""
+type Price {
+  _id: ObjectId!
+
+  """The amount billed per invoice to the customer"""
+  amount: Int!
+
+  """Community to which this price refers to"""
+  community: Community!
+
+  """Community creation date"""
+  createdAt: DateTime!
+
+  """A product price currency"""
+  currency: String!
+  isActive: Boolean!
+
+  """A product price nickname"""
+  nickname: String
+
+  """Product to which this price refers to"""
+  product: Product!
+
+  """The possible diferent periods a recurring price might take"""
+  recurringInterval: RecurringInterval
+
+  """The number of recurring intervals to aply to each invoice"""
+  recurringIntervalCount: Int
+  removedAt: DateTime
+
+  """Stripe price ID"""
+  stripePriceId: String!
+
+  """The number of days before charging the customer"""
+  trialDays: Int
+
+  """
+  Especifies if the customer has to pay once or repeately to mantain access to the product
+  """
+  type: PriceType!
+
+  """Community last update date"""
+  updatedAt: DateTime
+}
+
+"""
+Especifies if the customer has to pay once or repeately to mantain access to the product
+"""
+enum PriceType {
+  ONETIME
+  RECURRING
+}
+
+"""The Products model"""
+type Product {
+  _id: ObjectId!
+
+  """
+  Owner selected tags to appear on community home, given a specific order
+  """
+  benefits: [ProductBenefit!]!
+
+  """Community which is the owner of this product"""
+  community: Community!
+
+  """Community creation date"""
+  createdAt: DateTime!
+
+  """A community product description"""
+  description: String
+  isActive: Boolean!
+
+  """A community product name"""
+  name: String!
+  removedAt: DateTime
+
+  """Mini-description shown on membership credit card invoice"""
+  statementDescriptor: String
+
+  """Stripe connected account ID"""
+  stripeProductId: String!
+
+  """Community last update date"""
+  updatedAt: DateTime
+}
+
+"""Community product benefit model"""
+type ProductBenefit {
+  """The community product description"""
+  description: String!
+
+  """The order of the community product description"""
+  order: Int!
+}
+
+input ProductBenefitInput {
+  """A community product name"""
+  description: String!
+
+  """A community product description"""
+  order: Int
+}
+
 type Query {
   """Queries all posts in database"""
   allPosts(postOptions: PostOptionsInput): PostsResponse!
+
+  """Lists all cards, given filters"""
+  cards(cursor: String, limit: Int!, userId: String): PaginatedCards!
   communities: CommunitiesResponse!
   community(slug: String!): CommunityResponse!
 
@@ -483,6 +827,14 @@ type Query {
 
   """Queries all users in database"""
   users: UsersResponse!
+}
+
+"""The possible diferent periods a recurring price might take"""
+enum RecurringInterval {
+  DAY
+  MONTH
+  WEEK
+  YEAR
 }
 
 input RegisterUserInput {
@@ -683,6 +1035,34 @@ input UpdatePostInput {
   title: String
 }
 
+input UpdatePriceInput {
+  """Especifies if price is active"""
+  isActive: Boolean
+
+  """A product price nickname"""
+  nickname: String
+}
+
+input UpdateProductInput {
+  """
+  Owner selected tags to appear on community home, given a specific order
+  """
+  benefits: [ProductBenefitInput!]
+
+  """A community product description"""
+  description: String
+  isActive: Boolean
+
+  """A community product name"""
+  name: String
+
+  """Mini-description shown on membership credit card invoice"""
+  statementDescriptor: String
+
+  """Stripe connected account ID"""
+  stripeProductId: String
+}
+
 input UpdateRoleInput {
   """User role in community"""
   role: RoleOptions
@@ -743,11 +1123,20 @@ input UploadMediaInput {
 type User {
   _id: ObjectId!
 
+  """User address"""
+  address: Address
+
   """User avatar image link"""
   avatar: String
 
+  """User birthday"""
+  birthday: DateTime
+
   """User creation date"""
   createdAt: DateTime!
+
+  """User personal documents"""
+  documents: [PersonalDocument!]!
 
   """User email to be used on login"""
   email: String!
@@ -755,9 +1144,15 @@ type User {
 
   """User name"""
   name: String!
+
+  """User phone info"""
+  phone: Phone
   posts: [Post!]!
   removedAt: DateTime
   roles: [Role!]!
+
+  """Stripe customer Id"""
+  stripeCustomerId: String
 
   """User surname"""
   surname: String
