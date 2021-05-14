@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb';
 import { Field, Int, ObjectType } from 'type-graphql';
 import DateTimeScalar from '../../type-graphql/DateTimeScalar';
 import ObjectIdScalar from '../../type-graphql/ObjectIdScalar';
+import Community from '../communities/CommunityType';
 import Product from '../products/ProductType';
 import { PriceType, RecurringInterval } from './IPrice';
 
@@ -57,6 +58,11 @@ export default class Price {
     description: 'Product to which this price refers to',
   })
   product: Product;
+
+  @Field(() => Community, {
+    description: 'Community to which this price refers to',
+  })
+  community: Community;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _doc?: any;

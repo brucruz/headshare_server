@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`an user should be able to update product price 1`] = `
+Object {
+  "updatePrice": Object {
+    "isActive": false,
+  },
+}
+`;
+
+exports[`an user should not be able to update product price if it is not owned by its informed community 1`] = `
+Array [
+  [GraphQLError: You cannot modify another community product price],
+]
+`;
+
+exports[`an user should not be able to update product price if not a community creator 1`] = `
+Array [
+  [GraphQLError: You must be this community creator to create a product],
+]
+`;
+
+exports[`an user should not be able to update product price if not logged 1`] = `
+Array [
+  [GraphQLError: You must be connected to create a product],
+]
+`;
+
+exports[`an user should not be able to update product price if providing a non-existent communityId 1`] = `
+Array [
+  [GraphQLError: You must provide a valid community Id],
+]
+`;
+
+exports[`an user should not be able to update product price if providing a non-existent priceId 1`] = `
+Array [
+  [GraphQLError: You must provide a valid price Id],
+]
+`;

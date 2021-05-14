@@ -2,6 +2,7 @@
 import { Product } from 'aws-sdk/clients/ssm';
 import { Document } from 'mongoose';
 import { registerEnumType } from 'type-graphql';
+import Community from '../communities/CommunityType';
 
 export enum RecurringInterval {
   DAY = 'day',
@@ -46,6 +47,7 @@ export default interface IPrice extends Document {
   trialDays?: number;
   stripePriceId: string;
   product: Product;
+  community: Community;
   isActive: boolean;
   removedAt: Date | null;
   createdAt: Date;

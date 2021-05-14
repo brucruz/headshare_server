@@ -44,6 +44,10 @@ const Schema = new mongoose.Schema(
       type: ObjectId,
       ref: 'products',
     },
+    community: {
+      type: ObjectId,
+      ref: 'communities',
+    },
     ...isActiveMongooseField,
     ...removedAtMongooseField,
   },

@@ -537,6 +537,7 @@ type Mutation {
   """Users can upload a image directly as a post main media"""
   updatePostMainImage(communitySlug: String!, imageData: UploadImageInput!, postId: String!): PostResponse!
   updatePostMainMedia(communityId: String!, mainMediaData: UpdateMediaInput!, postId: String!): PostResponse!
+  updatePrice(communityId: String!, priceData: UpdatePriceInput!, priceId: String!): Price!
   updateProduct(communityId: String!, productData: UpdateProductInput!, productId: String!): Product!
   updateRole(id: String!, updateData: UpdateRoleInput!): RoleResponse
   updateTag(communitySlug: String!, id: String!, updateData: UpdateTagInput!): TagResponse
@@ -678,6 +679,9 @@ type Price {
 
   """The amount billed per invoice to the customer"""
   amount: Int!
+
+  """Community to which this price refers to"""
+  community: Community!
 
   """Community creation date"""
   createdAt: DateTime!
@@ -1029,6 +1033,14 @@ input UpdatePostInput {
 
   """Post title"""
   title: String
+}
+
+input UpdatePriceInput {
+  """Especifies if price is active"""
+  isActive: Boolean
+
+  """A product price nickname"""
+  nickname: String
 }
 
 input UpdateProductInput {

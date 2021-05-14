@@ -7,6 +7,9 @@ import CreateCardInput from '../modules/cards/inputs/CreateCardInput';
 import CommunityModel from '../modules/communities/CommunityModel';
 import ICommunity from '../modules/communities/ICommunity';
 import CreateCommunityInput from '../modules/communities/resolvers/input/CreateCommunityInput';
+import IPrice, { PriceType } from '../modules/prices/IPrice';
+import PriceModel from '../modules/prices/PriceModel';
+import CreatePriceInput from '../modules/prices/resolvers/input/CreatePriceInput';
 import IProduct from '../modules/products/IProduct';
 import ProductModel from '../modules/products/ProductModel';
 import CreateProductInput from '../modules/products/resolvers/input/CreateProductInput';
@@ -100,6 +103,37 @@ export const createProduct = async (
   }).save();
 
   return product;
+};
+
+export const createPrice = async (
+  args: DeepPartial<CreatePriceInput> = {},
+  communityId?: string,
+  productId?: string,
+): Promise<IPrice> => {
+  const { currency: receivedCurrency, type, amount, ...rest } = args;
+
+  const productObject = await ProductModel.findById(productId);
+  const product = productObject && productObject.stripeProductId;
+
+  const currency = receivedCurrency || 'USD';
+  // eslint-disable-next-line camelcase
+  const unit_amount = amount || 10;
+
+  const stripePriceId =
+    product &&
+    (await stripe.prices.create({ currency, unit_amount, product })).id;
+
+  const price = await new PriceModel({
+    currency: currency || 'USD',
+    type: type || PriceType.ONETIME,
+    amount: amount || 10,
+    stripePriceId,
+    product: productId,
+    community: communityId,
+    ...rest,
+  }).save();
+
+  return price;
 };
 
 export const createCard = async (
