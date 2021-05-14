@@ -372,17 +372,12 @@ export default class PostResolver {
       }
     }
 
-    let tagsObject;
+    let tagsIds;
 
     if (tags) {
       const returnedTags = await TagModel.find({ _id: { $in: tags } });
 
-      tagsObject = {
-        tags: returnedTags.map(tag => tag._id),
-        hasMore: false,
-      };
-
-      if (tagsObject) {
+      if (returnedTags.length === 0) {
         return {
           errors: [
             {
@@ -392,6 +387,8 @@ export default class PostResolver {
           ],
         };
       }
+
+      tagsIds = returnedTags.map(tag => tag._id);
     }
 
     const newData = {
@@ -404,7 +401,7 @@ export default class PostResolver {
         ...(formattedTitle ? { formattedTitle } : {}),
         ...(typeof exclusive !== 'undefined' ? { exclusive } : {}),
         ...(status ? { status } : {}),
-        ...(tags && tagsObject ? { tags: tagsObject } : {}),
+        ...(tags ? { tags: tagsIds } : {}),
         ...(mainMedia && mainMediaObject
           ? { mainMedia: mainMediaObject._id }
           : {}),
@@ -415,7 +412,7 @@ export default class PostResolver {
       {
         _id: new ObjectId(id),
       },
-      { ...newData, tags: tagsObject },
+      { ...newData },
       {
         new: true,
       },

@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`a post tags should be able to be updated 1`] = `
+Object {
+  "updatePost": Object {
+    "errors": null,
+    "post": Object {
+      "content": null,
+      "description": null,
+      "exclusive": false,
+      "formattedTitle": null,
+      "mainMedia": null,
+      "slug": "post-1",
+      "status": "DRAFT",
+      "tags": Object {
+        "hasMore": false,
+        "tags": Array [
+          Object {
+            "title": "Tag #1",
+          },
+        ],
+      },
+      "title": "Post #1",
+    },
+  },
+}
+`;
+
+exports[`a post tags should not be able to be updated, if provided tags are non-existent 1`] = `
+Object {
+  "updatePost": Object {
+    "errors": Array [
+      Object {
+        "field": "tags",
+        "message": "Tag Id is incorrect",
+      },
+    ],
+    "post": null,
+  },
+}
+`;
