@@ -873,7 +873,16 @@ export default class PostResolver {
         : {}),
     };
 
-    const postTagsIds = post._doc.tags.map((tag: any) => tag._id);
+    const postTags = post._doc.tags;
+
+    if (!postTags) {
+      return {
+        tags: [],
+        hasMore: false,
+      };
+    }
+
+    const postTagsIds = postTags.map((tag: any) => tag._id);
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const tags = (await TagModel.find({
