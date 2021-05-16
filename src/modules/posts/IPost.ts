@@ -35,6 +35,7 @@ export default interface IPost extends Document {
   canonicalComponents?: string;
   description?: string;
   mainMedia?: Media;
+  cover?: Media;
   status: PostStatus;
   content?: string;
   exclusive: boolean;

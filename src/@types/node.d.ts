@@ -1,9 +1,10 @@
 declare namespace NodeJS {
   export interface Counters {
     user: number;
-    post: number;
-    tag: number;
     community: number;
+    tag: number;
+    post: number;
+    media: number;
     product: number;
     card: number;
   }

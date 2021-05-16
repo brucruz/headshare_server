@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`post cover field should be able to return a post cover queried by a user 1`] = `
+Object {
+  "findPostById": Object {
+    "errors": null,
+    "post": Object {
+      "cover": Object {
+        "name": "Media #1",
+      },
+    },
+  },
+}
+`;
+
+exports[`post cover field should be able to return null to a post cover queried by a user 1`] = `
+Object {
+  "findPostById": Object {
+    "errors": null,
+    "post": Object {
+      "cover": null,
+    },
+  },
+}
+`;

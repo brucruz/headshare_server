@@ -31,11 +31,12 @@ import PostsResponse from './PostsResponse';
 import SuccessResponse from '../../shared/SuccessResponse';
 import PostOptionsInput from '../inputs/PostOptionsInput';
 import UploadImageInput from '../../medias/resolvers/input/UploadImageInput';
-import S3StorageProvider from '../../shared/providers/StorageProvider/implementations/S3StorageProvider';
 import getPostOptions from '../getPostOptions';
 import PaginatedTags from '../../tags/resolvers/PaginatedTags';
 import TagOptionsInput from '../../tags/inputs/TagOptionsInput';
 import getTagOptions from '../../tags/getTagOptions';
+import { isCreator as _isCreator } from '../../shared/errors/isCreator';
+import { uploadImage } from '../../medias/uploadImage';
 
 @Resolver(_of => Post)
 export default class PostResolver {
@@ -264,6 +265,7 @@ export default class PostResolver {
       status,
       tags,
       mainMedia,
+      cover,
     }: UpdatePostInput,
     @Ctx() { req }: ApolloContext,
   ): Promise<PostResponse> {
@@ -372,6 +374,23 @@ export default class PostResolver {
       }
     }
 
+    let coverObject;
+
+    if (cover) {
+      coverObject = await MediaModel.findById(cover);
+
+      if (!coverObject) {
+        return {
+          errors: [
+            {
+              field: 'cover',
+              message: 'Media Id is incorrect',
+            },
+          ],
+        };
+      }
+    }
+
     let tagsIds;
 
     if (tags) {
@@ -405,6 +424,7 @@ export default class PostResolver {
         ...(mainMedia && mainMediaObject
           ? { mainMedia: mainMediaObject._id }
           : {}),
+        ...(cover && coverObject ? { cover: coverObject._id } : {}),
       },
     };
 
@@ -707,108 +727,96 @@ export default class PostResolver {
     }: UploadImageInput,
     @Ctx() { req }: ApolloContext,
   ): Promise<PostResponse> {
-    const communityData = await CommunityModel.findOne({ slug: communitySlug });
+    const communityData = await _isCreator(
+      { slug: communitySlug },
+      req.session.userId,
+    );
     const community = communityData?._id;
 
-    if (!community) {
-      return {
-        errors: [
-          {
-            field: 'community',
-            message:
-              'You must be connected to a community to perform this action',
-          },
-        ],
-      };
-    }
-
-    const creator = req.session.userId;
-
-    if (!creator) {
-      return {
-        errors: [
-          {
-            field: 'auth',
-            message: 'You must be logged in to perform this action',
-          },
-        ],
-      };
-    }
-
-    const isCreator = await RoleModel.isCreator(creator, community);
-
-    if (!isCreator) {
-      return {
-        errors: [
-          {
-            field: 'role',
-            message: 'Only community creators may perform this action',
-          },
-        ],
-      };
-    }
-
-    if (format !== 'image') {
-      return {
-        errors: [
-          {
-            field: 'format',
-            message: 'Invalid media format',
-          },
-        ],
-      };
-    }
-
-    const storageProvider = new S3StorageProvider();
-
-    if (!file.name) {
-      return {
-        errors: [
-          {
-            field: 'fileName',
-            message: 'Filename is missing',
-          },
-        ],
-      };
-    }
-
-    if (!file.type) {
-      return {
-        errors: [
-          {
-            field: 'fileType',
-            message: 'Filetype is missing',
-          },
-        ],
-      };
-    }
-
     try {
-      const result = await storageProvider.createSignedRequest(
-        file.name,
-        file.type,
-      );
-
-      const media = new MediaModel({
-        format,
-        url: result.url,
-        thumbnailUrl,
-        name,
-        description,
-        file,
-        width,
-        height,
-        uploadLink: result.signedRequest,
+      const media = await uploadImage(
+        {
+          format,
+          thumbnailUrl,
+          name,
+          description,
+          file,
+          width,
+          height,
+        },
         community,
-      });
-
-      await media.save();
+      );
 
       const post = await PostModel.findByIdAndUpdate(
         postId,
         {
           $set: {
             ...{ mainMedia: media._id },
+          },
+        },
+        {
+          new: true,
+        },
+      );
+
+      return {
+        post: post || undefined,
+      };
+    } catch (err) {
+      return {
+        errors: [
+          {
+            field: 'none',
+            message: err,
+          },
+        ],
+      };
+    }
+  }
+
+  @Mutation(() => PostResponse, {
+    description: 'Users can upload a image directly as a post cover',
+  })
+  async updatePostCover(
+    @Arg('communitySlug', () => String) communitySlug: string,
+    @Arg('postId', () => String) postId: string,
+    @Arg('imageData', () => UploadImageInput)
+    {
+      format,
+      thumbnailUrl,
+      name,
+      description,
+      file,
+      width,
+      height,
+    }: UploadImageInput,
+    @Ctx() { req }: ApolloContext,
+  ): Promise<PostResponse> {
+    const communityData = await _isCreator(
+      { slug: communitySlug },
+      req.session.userId,
+    );
+    const community = communityData?._id;
+
+    try {
+      const media = await uploadImage(
+        {
+          format,
+          thumbnailUrl,
+          name,
+          description,
+          file,
+          width,
+          height,
+        },
+        community,
+      );
+
+      const post = await PostModel.findByIdAndUpdate(
+        postId,
+        {
+          $set: {
+            ...{ cover: media._id },
           },
         },
         {
@@ -900,5 +908,11 @@ export default class PostResolver {
   async mainMedia(@Root() post: Post): Promise<IMedia> {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return (await MediaModel.findById(post._doc.mainMedia))!;
+  }
+
+  @FieldResolver()
+  async cover(@Root() post: Post): Promise<IMedia> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return (await MediaModel.findById(post._doc.cover))!;
   }
 }

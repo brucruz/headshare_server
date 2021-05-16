@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`a post cover should be able to be uploaded then updated 1`] = `
+Object {
+  "updatePostCover": Object {
+    "post": Object {
+      "cover": Object {
+        "url": "https://headshare.s3.amazonaws.com/tests/images/test.jpg",
+      },
+    },
+  },
+}
+`;

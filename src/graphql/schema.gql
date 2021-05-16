@@ -229,6 +229,9 @@ input CreatePostInput {
   """Post content"""
   content: String
 
+  """Post cover information"""
+  cover: ObjectId
+
   """Post description"""
   description: String
 
@@ -534,6 +537,9 @@ type Mutation {
   updateCommunity(id: String!, updateData: UpdateCommunityInput!): CommunityResponse!
   updatePost(communitySlug: String!, id: String!, updateData: UpdatePostInput!): PostResponse
 
+  """Users can upload a image directly as a post cover"""
+  updatePostCover(communitySlug: String!, imageData: UploadImageInput!, postId: String!): PostResponse!
+
   """Users can upload a image directly as a post main media"""
   updatePostMainImage(communitySlug: String!, imageData: UploadImageInput!, postId: String!): PostResponse!
   updatePostMainMedia(communityId: String!, mainMediaData: UpdateMediaInput!, postId: String!): PostResponse!
@@ -602,6 +608,9 @@ type Post {
 
   """Post content"""
   content: String
+
+  """Post cover media"""
+  cover: Media
 
   """Post creation date"""
   createdAt: DateTime!
@@ -1009,6 +1018,9 @@ input UpdateMediaInput {
 input UpdatePostInput {
   """Post content"""
   content: String
+
+  """Post main media information"""
+  cover: String
 
   """Post description"""
   description: String

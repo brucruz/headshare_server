@@ -31,6 +31,12 @@ export default class CreatePostInput {
   })
   mainMedia?: ObjectId;
 
+  @Field(_type => ObjectIdScalar, {
+    description: 'Post cover information',
+    nullable: true,
+  })
+  cover?: ObjectId;
+
   @Field(() => Boolean, {
     description: 'If true, only exclusive members may view its content',
     nullable: true,

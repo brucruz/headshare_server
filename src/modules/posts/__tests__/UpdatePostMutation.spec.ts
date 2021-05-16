@@ -2,6 +2,7 @@ import { createTestClient } from 'apollo-server-testing';
 import { ObjectId } from 'mongodb';
 import {
   createCommunity,
+  createMedia,
   createPost,
   createTag,
   createUser,
@@ -49,6 +50,10 @@ describe('a post', () => {
             width
             height
           }
+          cover {
+            url
+            uploadLink
+          }
           content
           exclusive
           tags(limit: 10) {
@@ -61,6 +66,62 @@ describe('a post', () => {
       }
     }
   `;
+
+  it('cover should be able to be updated', async () => {
+    const user = await createUser();
+    const community = await createCommunity({}, user._id);
+    const cover = (await createMedia({}, community._id))._id.toString();
+    const post = await createPost({}, user._id, community._id);
+
+    const variables = {
+      postId: post._id.toString(),
+      communitySlug: community.slug,
+      post: {
+        cover,
+      },
+    };
+
+    const testServer = await getTestServer(user._id);
+
+    const { mutate } = createTestClient(testServer());
+    const result = await mutate({
+      mutation,
+      variables,
+    });
+
+    expect(result.errors).toBeFalsy();
+    expect(result.data.updatePost.errors).toBeFalsy();
+    expect(result.data.updatePost.post).toBeTruthy();
+    expect(result.data).toMatchSnapshot();
+  });
+
+  it('cover should not be able to be updated, if provided cover are non-existent', async () => {
+    const user = await createUser();
+    const community = await createCommunity({}, user._id);
+    const cover = new ObjectId().toString(); // non-existent-cover
+    const post = await createPost({}, user._id, community._id);
+
+    const variables = {
+      postId: post._id.toString(),
+      communitySlug: community.slug,
+      post: {
+        cover,
+      },
+    };
+
+    const testServer = await getTestServer(user._id);
+
+    const { mutate } = createTestClient(testServer());
+    const result = await mutate({
+      mutation,
+      variables,
+    });
+
+    expect(result.errors).toBeFalsy();
+    expect(result.data.updatePost.errors).toBeTruthy();
+    expect(result.data.updatePost.post).toBeFalsy();
+    expect(result.data).toMatchSnapshot();
+  });
 
   it('tags should be able to be updated', async () => {
     const user = await createUser();

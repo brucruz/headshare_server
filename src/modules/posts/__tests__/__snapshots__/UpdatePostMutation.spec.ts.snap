@@ -1,11 +1,52 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`a post cover should be able to be updated 1`] = `
+Object {
+  "updatePost": Object {
+    "errors": null,
+    "post": Object {
+      "content": null,
+      "cover": Object {
+        "uploadLink": "https://upload-test.media/1",
+        "url": "https://test.media/1",
+      },
+      "description": null,
+      "exclusive": false,
+      "formattedTitle": null,
+      "mainMedia": null,
+      "slug": "post-1",
+      "status": "DRAFT",
+      "tags": Object {
+        "hasMore": false,
+        "tags": Array [],
+      },
+      "title": "Post #1",
+    },
+  },
+}
+`;
+
+exports[`a post cover should not be able to be updated, if provided cover are non-existent 1`] = `
+Object {
+  "updatePost": Object {
+    "errors": Array [
+      Object {
+        "field": "cover",
+        "message": "Media Id is incorrect",
+      },
+    ],
+    "post": null,
+  },
+}
+`;
+
 exports[`a post tags should be able to be updated 1`] = `
 Object {
   "updatePost": Object {
     "errors": null,
     "post": Object {
       "content": null,
+      "cover": null,
       "description": null,
       "exclusive": false,
       "formattedTitle": null,

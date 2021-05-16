@@ -7,6 +7,9 @@ import CreateCardInput from '../modules/cards/inputs/CreateCardInput';
 import CommunityModel from '../modules/communities/CommunityModel';
 import ICommunity from '../modules/communities/ICommunity';
 import CreateCommunityInput from '../modules/communities/resolvers/input/CreateCommunityInput';
+import IMedia from '../modules/medias/IMedia';
+import MediaModel from '../modules/medias/MediaModel';
+import UploadMediaInput from '../modules/medias/resolvers/input/UploadMediaInput';
 import CreatePostInput from '../modules/posts/inputs/CreatePostInput';
 import IPost from '../modules/posts/IPost';
 import PostModel from '../modules/posts/PostModel';
@@ -38,8 +41,9 @@ export const startCounters = (): void => {
   global.__COUNTERS__ = {
     user: 0,
     community: 0,
-    post: 0,
     tag: 0,
+    post: 0,
+    media: 0,
     product: 0,
     card: 0,
   };
@@ -92,6 +96,24 @@ export const createCommunity = async (
   return community;
 };
 
+export const createTag = async (
+  args: DeepPartial<CreateTagInput> = {},
+  communityId?: string,
+): Promise<ITag> => {
+  const { title, slug, ...rest } = args;
+
+  const n = (global.__COUNTERS__.tag += 1);
+
+  const tag = await new TagModel({
+    title: title || `Tag #${n}`,
+    slug: slug || `tag-${n}`,
+    community: communityId,
+    ...rest,
+  }).save();
+
+  return tag;
+};
+
 export const createPost = async (
   args: DeepPartial<CreatePostInput> = {},
   creator: string,
@@ -112,22 +134,23 @@ export const createPost = async (
   return post;
 };
 
-export const createTag = async (
-  args: DeepPartial<CreateTagInput> = {},
+export const createMedia = async (
+  args: DeepPartial<UploadMediaInput> = {},
   communityId?: string,
-): Promise<ITag> => {
-  const { title, slug, ...rest } = args;
+): Promise<IMedia> => {
+  const { name, ...rest } = args;
 
-  const n = (global.__COUNTERS__.tag += 1);
+  const n = (global.__COUNTERS__.media += 1);
 
-  const tag = await new TagModel({
-    title: title || `Tag #${n}`,
-    slug: slug || `tag-${n}`,
+  const media = await new MediaModel({
+    name: name || `Media #${n}`,
     community: communityId,
+    url: `https://test.media/${n}`,
+    uploadLink: `https://upload-test.media/${n}`,
     ...rest,
   }).save();
 
-  return tag;
+  return media;
 };
 
 export const createProduct = async (

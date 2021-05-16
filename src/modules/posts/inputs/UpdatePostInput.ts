@@ -30,6 +30,12 @@ export default class UpdatePostInput {
   })
   mainMedia?: string;
 
+  @Field(_type => String, {
+    description: 'Post main media information',
+    nullable: true,
+  })
+  cover?: string;
+
   @Field(() => Boolean, {
     description: 'If true, only exclusive members may view its content',
     nullable: true,

@@ -36,6 +36,11 @@ const Schema = new mongoose.Schema(
       required: false,
       ref: 'medias',
     },
+    cover: {
+      type: ObjectId,
+      required: false,
+      ref: 'medias',
+    },
     content: {
       type: String,
     },

@@ -50,6 +50,12 @@ export default class Post {
   })
   mainMedia?: Media;
 
+  @Field(_type => Media, {
+    description: 'Post cover media',
+    nullable: true,
+  })
+  cover?: Media;
+
   @Field(() => String, { description: 'Post content', nullable: true })
   content?: string;
 
