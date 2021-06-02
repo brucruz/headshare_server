@@ -543,6 +543,9 @@ type Mutation {
   """Users can upload a image directly as a post main media"""
   updatePostMainImage(communitySlug: String!, imageData: UploadImageInput!, postId: String!): PostResponse!
   updatePostMainMedia(communityId: String!, mainMediaData: UpdateMediaInput!, postId: String!): PostResponse!
+
+  """Users can upload a video directly as a post main media"""
+  updatePostMainVideo(communitySlug: String!, postId: String!, videoData: UploadVideoInput!): Post!
   updatePrice(communityId: String!, priceData: UpdatePriceInput!, priceId: String!): Price!
   updateProduct(communityId: String!, productData: UpdateProductInput!, productId: String!): Product!
   updateRole(id: String!, updateData: UpdateRoleInput!): RoleResponse
@@ -1115,6 +1118,23 @@ input UploadImageInput {
 }
 
 input UploadMediaInput {
+  """Media internal description"""
+  description: String
+
+  """Media file information"""
+  file: FileInput!
+
+  """Media format"""
+  format: MediaFormat!
+
+  """Media internal name"""
+  name: String
+
+  """Media thumbnail picture url"""
+  thumbnailUrl: String
+}
+
+input UploadVideoInput {
   """Media internal description"""
   description: String
 

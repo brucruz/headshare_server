@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`a post main video should be able to be uploaded then updated 1`] = `
+Object {
+  "updatePostMainVideo": Object {
+    "mainMedia": Object {
+      "file": Object {
+        "name": "tests/videos/test.mov",
+        "size": 1024,
+        "type": "mov",
+      },
+    },
+  },
+}
+`;

@@ -9,6 +9,7 @@ import {
   Ctx,
   Int,
 } from 'type-graphql';
+import { ApolloError, UserInputError } from 'apollo-server-errors';
 import { ApolloContext } from '../../../apollo-server/ApolloContext';
 import transformSlug from '../../../utils/transformSlug';
 import CommunityModel from '../../communities/CommunityModel';
@@ -23,7 +24,7 @@ import { IUser } from '../../users/IUser';
 import CreatePostInput from '../inputs/CreatePostInput';
 import FindBySlugsInput from '../inputs/FindBySlugsInput';
 import UpdatePostInput from '../inputs/UpdatePostInput';
-import { PostStatus } from '../IPost';
+import IPost, { PostStatus } from '../IPost';
 import PostModel from '../PostModel';
 import Post from '../PostType';
 import PostResponse from './PostResponse';
@@ -37,6 +38,8 @@ import TagOptionsInput from '../../tags/inputs/TagOptionsInput';
 import getTagOptions from '../../tags/getTagOptions';
 import { isCreator as _isCreator } from '../../shared/errors/isCreator';
 import { uploadImage } from '../../medias/uploadImage';
+import UploadVideoInput from '../../medias/resolvers/input/UploadVideoInput';
+import { uploadVideo } from '../../medias/uploadVideo';
 
 @Resolver(_of => Post)
 export default class PostResolver {
@@ -759,18 +762,65 @@ export default class PostResolver {
         },
       );
 
+      if (!post) {
+        throw new UserInputError('Non existent post', { field: 'postId' });
+      }
+
       return {
-        post: post || undefined,
+        post,
       };
     } catch (err) {
-      return {
-        errors: [
-          {
-            field: 'none',
-            message: err,
+      throw new ApolloError(`An error ocurred: ${err}`);
+    }
+  }
+
+  @Mutation(() => Post, {
+    description: 'Users can upload a video directly as a post main media',
+  })
+  async updatePostMainVideo(
+    @Arg('communitySlug', () => String) communitySlug: string,
+    @Arg('postId', () => String) postId: string,
+    @Arg('videoData', () => UploadVideoInput)
+    { format, thumbnailUrl, name, description, file }: UploadVideoInput,
+    @Ctx() { req }: ApolloContext,
+  ): Promise<IPost> {
+    const communityData = await _isCreator(
+      { slug: communitySlug },
+      req.session.userId,
+    );
+    const community = communityData?._id;
+
+    try {
+      const media = await uploadVideo(
+        {
+          format,
+          thumbnailUrl,
+          name,
+          description,
+          file,
+        },
+        community,
+      );
+
+      const post = await PostModel.findByIdAndUpdate(
+        postId,
+        {
+          $set: {
+            ...{ mainMedia: media._id },
           },
-        ],
-      };
+        },
+        {
+          new: true,
+        },
+      );
+
+      if (!post) {
+        throw new UserInputError('Non existent post', { field: 'postId' });
+      }
+
+      return post;
+    } catch (err) {
+      throw new ApolloError(`An error ocurred: ${err}`);
     }
   }
 
