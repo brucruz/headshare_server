@@ -8,7 +8,7 @@ export const cleanDB = async (cb: any): Promise<void> => {
 };
 
 export const connectToDB = async (): Promise<typeof mongoose> => {
-  jest.setTimeout(20000);
+  // jest.setTimeout(20000);
 
   const mongoURL =
     'mongodb://localhost:27017/test-creators-communities-project';

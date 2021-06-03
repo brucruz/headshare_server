@@ -643,6 +643,33 @@ export default class PostResolver {
     }
   }
 
+  @Mutation(() => Post, {
+    description: 'Users can remove cover from a post',
+  })
+  async deletePostCover(
+    @Arg('communitySlug', () => String) communitySlug: string,
+    @Arg('postId', () => String) postId: string,
+    @Ctx() { req }: ApolloContext,
+  ): Promise<IPost> {
+    await _isCreator({ slug: communitySlug }, req.session.userId);
+
+    try {
+      const post = await PostModel.findById(postId);
+
+      if (!post) {
+        throw new UserInputError('Non existent post', { field: 'postId' });
+      }
+
+      post.mainMedia = undefined;
+
+      await post.save();
+
+      return post;
+    } catch (err) {
+      throw new ApolloError(`An error ocurred: ${err}`);
+    }
+  }
+
   @Mutation(() => SuccessResponse, { description: 'Owners may ' })
   async deletePost(
     @Arg('communitySlug', () => String) communitySlug: string,
@@ -824,7 +851,7 @@ export default class PostResolver {
     }
   }
 
-  @Mutation(() => PostResponse, {
+  @Mutation(() => Post, {
     description: 'Users can upload a image directly as a post cover',
   })
   async updatePostCover(
@@ -841,7 +868,7 @@ export default class PostResolver {
       height,
     }: UploadImageInput,
     @Ctx() { req }: ApolloContext,
-  ): Promise<PostResponse> {
+  ): Promise<IPost> {
     const communityData = await _isCreator(
       { slug: communitySlug },
       req.session.userId,
@@ -874,18 +901,13 @@ export default class PostResolver {
         },
       );
 
-      return {
-        post: post || undefined,
-      };
+      if (!post) {
+        throw new UserInputError('Non existent post', { field: 'postId' });
+      }
+
+      return post;
     } catch (err) {
-      return {
-        errors: [
-          {
-            field: 'none',
-            message: err,
-          },
-        ],
-      };
+      throw new ApolloError(`An error ocurred: ${err}`);
     }
   }
 

@@ -115,11 +115,14 @@ export const createTag = async (
 };
 
 export const createPost = async (
-  args: DeepPartial<CreatePostInput> = {},
+  args: DeepPartial<CreatePostInput> & {
+    cover?: string;
+    mainMedia?: string;
+  } = {},
   creator: string,
   communityId?: string,
 ): Promise<IPost> => {
-  const { title, slug, ...rest } = args;
+  const { title, slug, cover, mainMedia, ...rest } = args;
 
   const n = (global.__COUNTERS__.post += 1);
 
@@ -127,6 +130,8 @@ export const createPost = async (
     title: title || `Post #${n}`,
     slug: slug || `post-${n}`,
     community: communityId,
+    mainMedia,
+    cover,
     creator,
     ...rest,
   }).save();
@@ -136,7 +141,7 @@ export const createPost = async (
 
 export const createMedia = async (
   args: DeepPartial<UploadMediaInput> = {},
-  communityId?: string,
+  communityId: string,
 ): Promise<IMedia> => {
   const { name, ...rest } = args;
 

@@ -526,6 +526,9 @@ type Mutation {
   """Owners may """
   deletePost(communitySlug: String!, postId: String!): SuccessResponse!
 
+  """Users can remove cover from a post"""
+  deletePostCover(communitySlug: String!, postId: String!): Post!
+
   """Users can remove main media from a post"""
   deletePostMainMedia(communitySlug: String!, postId: String!): PostResponse!
 
@@ -538,7 +541,7 @@ type Mutation {
   updatePost(communitySlug: String!, id: String!, updateData: UpdatePostInput!): PostResponse
 
   """Users can upload a image directly as a post cover"""
-  updatePostCover(communitySlug: String!, imageData: UploadImageInput!, postId: String!): PostResponse!
+  updatePostCover(communitySlug: String!, imageData: UploadImageInput!, postId: String!): Post!
 
   """Users can upload a image directly as a post main media"""
   updatePostMainImage(communitySlug: String!, imageData: UploadImageInput!, postId: String!): PostResponse!

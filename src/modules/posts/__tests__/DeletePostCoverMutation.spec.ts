@@ -1,6 +1,7 @@
 import { createTestClient } from 'apollo-server-testing';
 import {
   createCommunity,
+  createMedia,
   createPost,
   createUser,
 } from '../../../test/createRows';
@@ -9,6 +10,7 @@ import getTestServer, {
   connectMongoose,
   disconnectMongoose,
 } from '../../../test/testRun';
+import { MediaFormat } from '../../medias/IMedia';
 import FileInput from '../../medias/resolvers/input/FileInput';
 
 const gql = String.raw;
@@ -19,39 +21,32 @@ beforeEach(clearDbAndRestartCounters);
 
 afterAll(disconnectMongoose);
 
-describe('a post', () => {
+describe('a post cover', () => {
   const mutation = gql`
-    mutation UpdatePostCover(
-      $communitySlug: String!
-      $postId: String!
-      $imageData: UploadImageInput!
-    ) {
-      updatePostCover(
-        communitySlug: $communitySlug
-        postId: $postId
-        imageData: $imageData
-      ) {
+    mutation DeletePostCover($communitySlug: String!, $postId: String!) {
+      deletePostCover(communitySlug: $communitySlug, postId: $postId) {
         cover {
-          url
+          file {
+            name
+            type
+            size
+          }
         }
       }
     }
   `;
 
-  it('cover should be able to be uploaded then updated', async () => {
+  it('should be able to be removed', async () => {
     const user = await createUser();
     const community = await createCommunity({}, user._id);
-    const post = await createPost({}, user._id, community._id);
-    const format = 'IMAGE';
+    const format = 'IMAGE' as MediaFormat.IMAGE;
     const file: FileInput = { name: 'tests/images/test.jpg', type: 'jpg' };
+    const cover = (await createMedia({ format, file }, community._id))._id;
+    const post = await createPost({ cover }, user._id, community._id);
 
     const variables = {
-      postId: post._id.toString(),
       communitySlug: community.slug,
-      imageData: {
-        format,
-        file,
-      },
+      postId: post._id.toString(),
     };
 
     const testServer = await getTestServer(user._id);
@@ -63,7 +58,7 @@ describe('a post', () => {
     });
 
     expect(result.errors).toBeFalsy();
-    expect(result.data.updatePostCover).toBeTruthy();
+    expect(result.data.deletePostCover).toBeTruthy();
     expect(result.data).toMatchSnapshot();
   });
 });

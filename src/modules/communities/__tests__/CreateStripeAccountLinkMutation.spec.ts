@@ -9,6 +9,23 @@ import getTestServer, {
 
 const gql = String.raw;
 
+function mockCreateStripeAccountLink() {
+  return {
+    url: 'http://example.com',
+  };
+}
+
+jest.mock(
+  '../../shared/providers/PaymentProvider/implementations/StripeProvider',
+  () => ({
+    stripe: {
+      accountLinks: {
+        create: mockCreateStripeAccountLink,
+      },
+    },
+  }),
+);
+
 beforeAll(connectMongoose);
 
 beforeEach(clearDbAndRestartCounters);

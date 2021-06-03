@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`a post cover should be able to be removed 1`] = `
+Object {
+  "deletePostCover": Object {
+    "cover": Object {
+      "file": Object {
+        "name": "tests/images/test.jpg",
+        "size": null,
+        "type": "jpg",
+      },
+    },
+  },
+}
+`;

@@ -36,7 +36,7 @@ const mongooseOptions: ConnectOptions = {
 // mongoose.set('debug', true);
 
 export async function connectMongoose(): Promise<typeof mongoose | void> {
-  jest.setTimeout(20000);
+  // jest.setTimeout(20000);
   startCounters();
 
   // return mongoose.connect(global.__MONGO_URI__, {
