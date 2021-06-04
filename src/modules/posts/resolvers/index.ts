@@ -660,7 +660,7 @@ export default class PostResolver {
         throw new UserInputError('Non existent post', { field: 'postId' });
       }
 
-      post.mainMedia = undefined;
+      post.cover = undefined;
 
       await post.save();
 

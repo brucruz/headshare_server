@@ -28,8 +28,6 @@ describe('a post cover', () => {
         cover {
           file {
             name
-            type
-            size
           }
         }
       }

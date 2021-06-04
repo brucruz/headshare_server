@@ -8,6 +8,23 @@ import getTestServer, {
 
 const gql = String.raw;
 
+function mockCreateStripeAccount() {
+  return {
+    id: 'stripe-account-id',
+  };
+}
+
+jest.mock(
+  '../../shared/providers/PaymentProvider/implementations/StripeProvider',
+  () => ({
+    stripe: {
+      accounts: {
+        create: mockCreateStripeAccount,
+      },
+    },
+  }),
+);
+
 beforeAll(connectMongoose);
 
 beforeEach(clearDbAndRestartCounters);
